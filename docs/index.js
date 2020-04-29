@@ -244,22 +244,33 @@ haxe_ds_StringMap.prototype = {
 var haxe_exercise_Main = function() { };
 haxe_exercise_Main.__name__ = true;
 haxe_exercise_Main.main = function() {
-	var set = new haxe_exercise_set_Set();
-	var question = window.document.getElementById("question");
+	var question = new haxe_exercise_questions_TypeQuestion();
+	var prompt = window.document.getElementById("question");
 	var input = window.document.getElementById("answer");
 	var button = window.document.getElementById("submit");
 	var result = window.document.getElementById("result");
 	var divider = "-----------------------------------------------------";
-	question.innerHTML = "<b>" + set.title() + "</b><br>Question: " + set.prompt() + "<br><pre>" + divider + "\n" + StringTools.htmlEscape(set.code()) + "\n" + divider + "</pre>";
+	prompt.innerHTML = "<b>" + question.title() + "</b><br>Question: " + question.prompt() + "<br><pre>" + divider + "\n" + StringTools.htmlEscape(question.code()) + "\n" + divider + "</pre>";
 	button.onclick = function() {
+		var _g = question.answer();
 		var tmp;
-		try {
-			tmp = set.answer(input.value) ? "<span class=\"correct\">Correct!</span>" : "<span class=\"incorrect\">Incorrect!</span>";
-		} catch( e ) {
-			tmp = "<span class=\"incorrect\">Error: " + Std.string(((e) instanceof js__$Boot_HaxeError) ? e.val : e) + "</span>";
+		if(_g._hx_index == 0) {
+			var f = _g.checker;
+			try {
+				tmp = f(input.value) ? "<span class=\"correct\">Correct!</span>" : "<span class=\"incorrect\">Incorrect!</span>";
+			} catch( e ) {
+				tmp = "<span class=\"incorrect\">Error: " + Std.string(((e) instanceof js__$Boot_HaxeError) ? e.val : e) + "</span>";
+			}
+		} else {
+			throw new js__$Boot_HaxeError("TODO");
 		}
 		return result.innerHTML = tmp;
 	};
+};
+var haxe_exercise_Answer = $hxEnums["haxe.exercise.Answer"] = { __ename__ : true, __constructs__ : ["FreeText","MultipleChoices","TrueOrFalse"]
+	,FreeText: ($_=function(checker) { return {_hx_index:0,checker:checker,__enum__:"haxe.exercise.Answer",toString:$estr}; },$_.__params__ = ["checker"],$_)
+	,MultipleChoices: ($_=function(answer,others) { return {_hx_index:1,answer:answer,others:others,__enum__:"haxe.exercise.Answer",toString:$estr}; },$_.__params__ = ["answer","others"],$_)
+	,TrueOrFalse: ($_=function(v) { return {_hx_index:2,v:v,__enum__:"haxe.exercise.Answer",toString:$estr}; },$_.__params__ = ["v"],$_)
 };
 var haxe_macro_ComplexType = $hxEnums["haxe.macro.ComplexType"] = { __ename__ : true, __constructs__ : ["TPath","TFunction","TAnonymous","TParent","TExtend","TOptional","TNamed","TIntersection"]
 	,TPath: ($_=function(p) { return {_hx_index:0,p:p,__enum__:"haxe.macro.ComplexType",toString:$estr}; },$_.__params__ = ["p"],$_)
@@ -275,12 +286,12 @@ var haxe_macro_TypeParam = $hxEnums["haxe.macro.TypeParam"] = { __ename__ : true
 	,TPType: ($_=function(t) { return {_hx_index:0,t:t,__enum__:"haxe.macro.TypeParam",toString:$estr}; },$_.__params__ = ["t"],$_)
 	,TPExpr: ($_=function(e) { return {_hx_index:1,e:e,__enum__:"haxe.macro.TypeParam",toString:$estr}; },$_.__params__ = ["e"],$_)
 };
-var haxe_exercise_set_Set = function() {
-	this.index = Std.random(haxe_exercise_set_Set.LIST.length);
-	this.ANSWER = haxe_exercise_set_Set.LIST[this.index];
+var haxe_exercise_questions_TypeQuestion = function() {
+	this.index = Std.random(haxe_exercise_questions_TypeQuestion.LIST.length);
+	this.ANSWER = haxe_exercise_questions_TypeQuestion.LIST[this.index];
 };
-haxe_exercise_set_Set.__name__ = true;
-haxe_exercise_set_Set.prototype = {
+haxe_exercise_questions_TypeQuestion.__name__ = true;
+haxe_exercise_questions_TypeQuestion.prototype = {
 	title: function() {
 		return "Type #" + (this.index + 1);
 	}
@@ -289,9 +300,9 @@ haxe_exercise_set_Set.prototype = {
 	}
 	,code: function() {
 		var printer = new haxe_macro_Printer();
-		var types = this.enumify({ pack : [], name : "Outcome", pos : { file : "src/haxe/exercise/set/Set.hx", min : 1050, max : 1130}, meta : [], params : [{ name : "A", params : [], constraints : []},{ name : "B", params : [], constraints : []}], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : [{ name : "Success", kind : haxe_macro_FieldType.FFun({ args : [{ name : "v", opt : false, type : haxe_macro_ComplexType.TPath({ pack : [], name : "A", params : []})}], ret : null, expr : null, params : []}), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1076, max : 1098}},{ name : "Failure", kind : haxe_macro_FieldType.FFun({ args : [{ name : "v", opt : false, type : haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []})}], ret : null, expr : null, params : []}), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1103, max : 1125}}]});
-		var types1 = [{ pack : [], name : "Error", pos : { file : "src/haxe/exercise/set/Set.hx", min : 1017, max : 1031}, meta : [], params : [], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : []},types,{ pack : [], name : "Future", pos : { file : "src/haxe/exercise/set/Set.hx", min : 1142, max : 1210}, meta : [], params : [{ name : "A", params : [], constraints : []}], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : [{ name : "map", access : [haxe_macro_Access.APublic], kind : haxe_macro_FieldType.FFun({ args : [{ name : "f", opt : false, type : haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "A", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []}))}], ret : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []}))]}), expr : null, params : [{ name : "B", constraints : null, params : []}]}), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1164, max : 1205}}]}];
-		var exprs = [{ expr : haxe_macro_ExprDef.EVars([{ name : "future", type : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}))]}), expr : null, isFinal : false}]), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1246, max : 1249}},{ expr : haxe_macro_ExprDef.EVars([{ name : "f", type : haxe_exercise_set_Set.COMPLEX_TYPE_PLACEHOLDER, expr : null, isFinal : false}]), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1282, max : 1285}},{ expr : haxe_macro_ExprDef.EVars([{ name : "result", type : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(this.ANSWER)]}), expr : { expr : haxe_macro_ExprDef.ECall({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("future")), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1356, max : 1362}},"map"), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1356, max : 1366}},[{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("f")), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1367, max : 1368}}]), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1356, max : 1369}}, isFinal : false}]), pos : { file : "src/haxe/exercise/set/Set.hx", min : 1327, max : 1330}}];
+		var types = this.enumify({ pack : [], name : "Outcome", pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1116, max : 1196}, meta : [], params : [{ name : "A", params : [], constraints : []},{ name : "B", params : [], constraints : []}], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : [{ name : "Success", kind : haxe_macro_FieldType.FFun({ args : [{ name : "v", opt : false, type : haxe_macro_ComplexType.TPath({ pack : [], name : "A", params : []})}], ret : null, expr : null, params : []}), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1142, max : 1164}},{ name : "Failure", kind : haxe_macro_FieldType.FFun({ args : [{ name : "v", opt : false, type : haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []})}], ret : null, expr : null, params : []}), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1169, max : 1191}}]});
+		var types1 = [{ pack : [], name : "Error", pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1083, max : 1097}, meta : [], params : [], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : []},types,{ pack : [], name : "Future", pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1208, max : 1276}, meta : [], params : [{ name : "A", params : [], constraints : []}], isExtern : false, kind : haxe_macro_TypeDefKind.TDClass(null,[],false,false), fields : [{ name : "map", access : [haxe_macro_Access.APublic], kind : haxe_macro_FieldType.FFun({ args : [{ name : "f", opt : false, type : haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "A", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []}))}], ret : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "B", params : []}))]}), expr : null, params : [{ name : "B", constraints : null, params : []}]}), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1230, max : 1271}}]}];
+		var exprs = [{ expr : haxe_macro_ExprDef.EVars([{ name : "future", type : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}))]}), expr : null, isFinal : false}]), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1312, max : 1315}},{ expr : haxe_macro_ExprDef.EVars([{ name : "f", type : haxe_exercise_questions_TypeQuestion.COMPLEX_TYPE_PLACEHOLDER, expr : null, isFinal : false}]), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1348, max : 1351}},{ expr : haxe_macro_ExprDef.EVars([{ name : "result", type : haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(this.ANSWER)]}), expr : { expr : haxe_macro_ExprDef.ECall({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("future")), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1422, max : 1428}},"map"), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1422, max : 1432}},[{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("f")), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1433, max : 1434}}]), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1422, max : 1435}}, isFinal : false}]), pos : { file : "src/haxe/exercise/questions/TypeQuestion.hx", min : 1393, max : 1396}}];
 		var buf_b = "";
 		var _g = 0;
 		while(_g < types1.length) {
@@ -309,32 +320,35 @@ haxe_exercise_set_Set.prototype = {
 		}
 		return buf_b;
 	}
-	,answer: function(v) {
-		var v1 = "var x:" + v;
-		var this1 = haxe_io_Bytes.ofString(v1);
-		var expr = new haxeparser_HaxeParser(this1,"Answer").expr();
-		var printer = new haxe_macro_Printer();
-		try {
-			var _g = expr.expr;
-			if(_g._hx_index == 10) {
-				var _g1 = _g.vars;
-				if(_g1.length == 1) {
-					var _g2 = _g1[0];
-					var _g5 = _g2.name;
-					var _g4 = _g2.isFinal;
-					var _g3 = _g2.expr;
-					var v2 = _g2.type;
-					return printer.printComplexType(this.ANSWER) == printer.printComplexType(v2);
+	,answer: function() {
+		var _gthis = this;
+		return haxe_exercise_Answer.FreeText(function(v) {
+			var v1 = "var x:" + v;
+			var this1 = haxe_io_Bytes.ofString(v1);
+			var expr = new haxeparser_HaxeParser(this1,"Answer").expr();
+			var printer = new haxe_macro_Printer();
+			try {
+				var _g = expr.expr;
+				if(_g._hx_index == 10) {
+					var _g1 = _g.vars;
+					if(_g1.length == 1) {
+						var _g2 = _g1[0];
+						var _g5 = _g2.name;
+						var _g4 = _g2.isFinal;
+						var _g3 = _g2.expr;
+						var v2 = _g2.type;
+						return printer.printComplexType(_gthis.ANSWER) == printer.printComplexType(v2);
+					} else {
+						return false;
+					}
 				} else {
 					return false;
 				}
-			} else {
+			} catch( e ) {
+				var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
 				return false;
 			}
-		} catch( e ) {
-			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-			return false;
-		}
+		});
 	}
 	,enumify: function(def) {
 		def.kind = haxe_macro_TypeDefKind.TDEnum;
@@ -7462,8 +7476,8 @@ Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function()
 	return String(this.val);
 }});
 js_Boot.__toStr = ({ }).toString;
-haxe_exercise_set_Set.COMPLEX_TYPE_PLACEHOLDER = haxe_macro_ComplexType.TPath({ pack : [], name : "_", params : [], sub : null});
-haxe_exercise_set_Set.LIST = [haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]})),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}))]})];
+haxe_exercise_questions_TypeQuestion.COMPLEX_TYPE_PLACEHOLDER = haxe_macro_ComplexType.TPath({ pack : [], name : "_", params : [], sub : null});
+haxe_exercise_questions_TypeQuestion.LIST = [haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]})),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}))]})];
 hxparse_LexEngine.EMPTY = [];
 hxparse_LexEngine.ALL_CHARS = [new hxparse__$LexEngine_CharRange(0,255)];
 haxeparser_HaxeLexer.keywords = (function($this) {

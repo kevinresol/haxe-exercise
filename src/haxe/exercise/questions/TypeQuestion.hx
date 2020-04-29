@@ -1,10 +1,11 @@
-package haxe.exercise.set;
+package haxe.exercise.questions;
 
 import byte.ByteData;
+import haxe.exercise.Question;
 import haxe.macro.Printer;
 import haxe.macro.Expr;
 
-class Set {
+class TypeQuestion implements Question {
 	public static final COMPLEX_TYPE_PLACEHOLDER:ComplexType = TPath({pack: [], name: '_', params: [], sub: null});
 	
 	public final ANSWER:ComplexType;
@@ -71,23 +72,24 @@ class Set {
 		return buf.toString();
 	}
 	
-	public function answer(v:String):Bool {
-		
-		var v = 'var x:$v';
-		
-		var expr = new haxeparser.HaxeParser(ByteData.ofString(v), 'Answer').expr();
-		var printer = new Printer();
-		
-		return try {
-			switch expr.expr {
-				case EVars([{type: v}]):
-					printer.printComplexType(ANSWER) == printer.printComplexType(v);
-				case _:
-					false;
+	public function answer():Answer {
+		return FreeText(v -> {
+			var v = 'var x:$v';
+			
+			var expr = new haxeparser.HaxeParser(ByteData.ofString(v), 'Answer').expr();
+			var printer = new Printer();
+			
+			try {
+				switch expr.expr {
+					case EVars([{type: v}]):
+						printer.printComplexType(ANSWER) == printer.printComplexType(v);
+					case _:
+						false;
+				}
+			} catch(e:Dynamic) {
+				false;
 			}
-		} catch(e:Dynamic) {
-			false;
-		}
+		});
 	}
 	
 	function enumify(def:TypeDefinition) {
