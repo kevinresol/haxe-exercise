@@ -1,0 +1,6 @@
+-cp src
+-main haxe.exercise.Main
+-js doc/index.js
+-dce full
+
+-lib haxeparser
