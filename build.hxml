@@ -4,3 +4,5 @@
 -dce full
 
 -lib haxeparser
+
+-D analyzer-optimize

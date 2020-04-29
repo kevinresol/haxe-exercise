@@ -61,11 +61,8 @@ var Lambda = function() { };
 Lambda.__name__ = true;
 Lambda.has = function(it,elt) {
 	var x = $getIterator(it);
-	while(x.hasNext()) {
-		var x1 = x.next();
-		if(x1 == elt) {
-			return true;
-		}
+	while(x.hasNext()) if(x.next() == elt) {
+		return true;
 	}
 	return false;
 };
@@ -245,19 +242,17 @@ var haxe_exercise_Main = function() { };
 haxe_exercise_Main.__name__ = true;
 haxe_exercise_Main.main = function() {
 	var question = new haxe_exercise_questions_TypeQuestion();
-	var prompt = window.document.getElementById("question");
 	var input = window.document.getElementById("answer");
 	var button = window.document.getElementById("submit");
 	var result = window.document.getElementById("result");
-	var divider = "-----------------------------------------------------";
-	prompt.innerHTML = "<b>" + question.title() + "</b><br>Question: " + question.prompt() + "<br><pre>" + divider + "\n" + StringTools.htmlEscape(question.code()) + "\n" + divider + "</pre>";
+	window.document.getElementById("question").innerHTML = "<b>" + question.title() + "</b><br>Question: " + question.prompt() + "<br><pre>" + "-----------------------------------------------------" + "\n" + StringTools.htmlEscape(question.code()) + "\n" + "-----------------------------------------------------" + "</pre>";
 	button.onclick = function() {
 		var _g = question.answer();
 		var tmp;
 		if(_g._hx_index == 0) {
-			var f = _g.checker;
+			var _g1 = _g.checker;
 			try {
-				tmp = f(input.value) ? "<span class=\"correct\">Correct!</span>" : "<span class=\"incorrect\">Incorrect!</span>";
+				tmp = _g1(input.value) ? "<span class=\"correct\">Correct!</span>" : "<span class=\"incorrect\">Incorrect!</span>";
 			} catch( e ) {
 				tmp = "<span class=\"incorrect\">Error: " + Std.string(((e) instanceof js__$Boot_HaxeError) ? e.val : e) + "</span>";
 			}
@@ -306,16 +301,12 @@ haxe_exercise_questions_TypeQuestion.prototype = {
 		var buf_b = "";
 		var _g = 0;
 		while(_g < types1.length) {
-			var type = types1[_g];
-			++_g;
-			buf_b += Std.string(printer.printTypeDefinition(type));
+			buf_b += Std.string(printer.printTypeDefinition(types1[_g++]));
 			buf_b += "\n\n";
 		}
 		var _g1 = 0;
 		while(_g1 < exprs.length) {
-			var expr = exprs[_g1];
-			++_g1;
-			buf_b += Std.string(printer.printExpr(expr));
+			buf_b += Std.string(printer.printExpr(exprs[_g1++]));
 			buf_b += ";\n";
 		}
 		return buf_b;
@@ -323,21 +314,15 @@ haxe_exercise_questions_TypeQuestion.prototype = {
 	,answer: function() {
 		var _gthis = this;
 		return haxe_exercise_Answer.FreeText(function(v) {
-			var v1 = "var x:" + v;
-			var this1 = haxe_io_Bytes.ofString(v1);
-			var expr = new haxeparser_HaxeParser(this1,"Answer").expr();
+			var expr = new haxeparser_HaxeParser(haxe_io_Bytes.ofString("var x:" + v),"Answer").expr();
 			var printer = new haxe_macro_Printer();
 			try {
 				var _g = expr.expr;
 				if(_g._hx_index == 10) {
 					var _g1 = _g.vars;
 					if(_g1.length == 1) {
-						var _g2 = _g1[0];
-						var _g5 = _g2.name;
-						var _g4 = _g2.isFinal;
-						var _g3 = _g2.expr;
-						var v2 = _g2.type;
-						return printer.printComplexType(_gthis.ANSWER) == printer.printComplexType(v2);
+						var _g6 = _g1[0].type;
+						return printer.printComplexType(_gthis.ANSWER) == printer.printComplexType(_g6);
 					} else {
 						return false;
 					}
@@ -345,7 +330,6 @@ haxe_exercise_questions_TypeQuestion.prototype = {
 					return false;
 				}
 			} catch( e ) {
-				var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
 				return false;
 			}
 		});
@@ -415,7 +399,6 @@ haxe_io_Bytes.prototype = {
 		var max = pos + len;
 		switch(encoding._hx_index) {
 		case 0:
-			var debug = pos > 0;
 			while(i < max) {
 				var c = b[i++];
 				if(c < 128) {
@@ -427,13 +410,10 @@ haxe_io_Bytes.prototype = {
 					var code = (c & 63) << 6 | b[i++] & 127;
 					s += String.fromCodePoint(code);
 				} else if(c < 240) {
-					var c2 = b[i++];
-					var code1 = (c & 31) << 12 | (c2 & 127) << 6 | b[i++] & 127;
+					var code1 = (c & 31) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
 					s += String.fromCodePoint(code1);
 				} else {
-					var c21 = b[i++];
-					var c3 = b[i++];
-					var u = (c & 15) << 18 | (c21 & 127) << 12 | (c3 & 127) << 6 | b[i++] & 127;
+					var u = (c & 15) << 18 | (b[i++] & 127) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
 					s += String.fromCodePoint(u);
 				}
 			}
@@ -649,8 +629,7 @@ haxe_macro_Printer.prototype = {
 		case 19:
 			return "%";
 		case 20:
-			var op1 = op.op;
-			return this.printBinop(op1) + "=";
+			return this.printBinop(op.op) + "=";
 		case 21:
 			return "...";
 		case 22:
@@ -668,32 +647,23 @@ haxe_macro_Printer.prototype = {
 	,printConstant: function(c) {
 		switch(c._hx_index) {
 		case 0:
-			var s = c.v;
-			return s;
+			return c.v;
 		case 1:
-			var s1 = c.f;
-			return s1;
+			return c.f;
 		case 2:
-			var _g6 = c.kind;
-			var s2 = c.s;
-			return this.printString(s2);
+			return this.printString(c.s);
 		case 3:
-			var s3 = c.s;
-			return s3;
+			return c.s;
 		case 4:
-			var opt = c.opt;
-			var s4 = c.r;
-			return "~/" + s4 + "/" + opt;
+			return "~/" + c.r + "/" + c.opt;
 		}
 	}
 	,printTypeParam: function(param) {
 		switch(param._hx_index) {
 		case 0:
-			var ct = param.t;
-			return this.printComplexType(ct);
+			return this.printComplexType(param.t);
 		case 1:
-			var e = param.e;
-			return this.printExpr(e);
+			return this.printExpr(param.e);
 		}
 	}
 	,printTypePath: function(tp) {
@@ -720,103 +690,66 @@ haxe_macro_Printer.prototype = {
 	,printComplexType: function(ct) {
 		switch(ct._hx_index) {
 		case 0:
-			var tp = ct.p;
-			return this.printTypePath(tp);
+			return this.printTypePath(ct.p);
 		case 1:
-			var ret = ct.ret;
-			var args = ct.args;
-			var tmp;
-			if(args.length == 1) {
-				var tmp1;
-				var _g = args[0];
-				var tmp2;
-				if(_g._hx_index == 6) {
-					var _g2 = _g.t;
-					var _g1 = _g.n;
-					tmp2 = true;
-				} else {
-					tmp2 = false;
-				}
-				if(!tmp2) {
-					var _g3 = args[0];
-					if(_g3._hx_index == 1) {
-						var _g5 = _g3.ret;
-						var _g4 = _g3.args;
-						tmp1 = true;
-					} else {
-						tmp1 = false;
-					}
-				} else {
-					tmp1 = true;
-				}
-				tmp = !tmp1;
-			} else {
-				tmp = false;
-			}
-			if(tmp) {
-				return this.printComplexType(args[0]) + " -> " + this.printComplexType(ret);
+			var _g3 = ct.ret;
+			var _g2 = ct.args;
+			if(_g2.length == 1 && !(_g2[0]._hx_index == 6 || _g2[0]._hx_index == 1)) {
+				return this.printComplexType(_g2[0]) + " -> " + this.printComplexType(_g3);
 			} else {
 				var f = $bind(this,this.printComplexType);
-				var result = new Array(args.length);
-				var _g6 = 0;
-				var _g11 = args.length;
-				while(_g6 < _g11) {
-					var i = _g6++;
-					result[i] = f(args[i]);
+				var result = new Array(_g2.length);
+				var _g = 0;
+				var _g1 = _g2.length;
+				while(_g < _g1) {
+					var i = _g++;
+					result[i] = f(_g2[i]);
 				}
-				return "(" + result.join(", ") + ")" + " -> " + this.printComplexType(ret);
+				return "(" + result.join(", ") + ")" + " -> " + this.printComplexType(_g3);
 			}
 			break;
 		case 2:
-			var fields = ct.fields;
-			var _g7 = [];
-			var _g12 = 0;
-			while(_g12 < fields.length) {
-				var f1 = fields[_g12];
-				++_g12;
-				_g7.push(this.printField(f1) + "; ");
-			}
-			return "{ " + _g7.join("") + "}";
+			var _g7 = ct.fields;
+			var _g4 = [];
+			var _g11 = 0;
+			while(_g11 < _g7.length) _g4.push(this.printField(_g7[_g11++]) + "; ");
+			return "{ " + _g4.join("") + "}";
 		case 3:
-			var ct1 = ct.t;
-			return "(" + this.printComplexType(ct1) + ")";
+			return "(" + this.printComplexType(ct.t) + ")";
 		case 4:
-			var fields1 = ct.fields;
-			var tpl = ct.p;
-			var f2 = $bind(this,this.printTypePath);
-			var result1 = new Array(tpl.length);
-			var _g8 = 0;
-			var _g13 = tpl.length;
-			while(_g8 < _g13) {
-				var i1 = _g8++;
-				result1[i1] = f2(tpl[i1]);
+			var _g10 = ct.fields;
+			var _g9 = ct.p;
+			var f1 = $bind(this,this.printTypePath);
+			var result1 = new Array(_g9.length);
+			var _g5 = 0;
+			var _g12 = _g9.length;
+			while(_g5 < _g12) {
+				var i1 = _g5++;
+				result1[i1] = f1(_g9[i1]);
 			}
-			var tmp3 = "{> " + result1.join(" >, ") + ", ";
-			var f3 = $bind(this,this.printField);
-			var result2 = new Array(fields1.length);
-			var _g9 = 0;
-			var _g14 = fields1.length;
-			while(_g9 < _g14) {
-				var i2 = _g9++;
-				result2[i2] = f3(fields1[i2]);
+			var tmp = "{> " + result1.join(" >, ") + ", ";
+			var f2 = $bind(this,this.printField);
+			var result2 = new Array(_g10.length);
+			var _g6 = 0;
+			var _g13 = _g10.length;
+			while(_g6 < _g13) {
+				var i2 = _g6++;
+				result2[i2] = f2(_g10[i2]);
 			}
-			return tmp3 + result2.join(", ") + " }";
+			return tmp + result2.join(", ") + " }";
 		case 5:
-			var ct2 = ct.t;
-			return "?" + this.printComplexType(ct2);
+			return "?" + this.printComplexType(ct.t);
 		case 6:
-			var ct3 = ct.t;
-			var n = ct.n;
-			return n + ":" + this.printComplexType(ct3);
+			return ct.n + ":" + this.printComplexType(ct.t);
 		case 7:
-			var tl = ct.tl;
-			var f4 = $bind(this,this.printComplexType);
-			var result3 = new Array(tl.length);
-			var _g10 = 0;
-			var _g15 = tl.length;
-			while(_g10 < _g15) {
-				var i3 = _g10++;
-				result3[i3] = f4(tl[i3]);
+			var _g8 = ct.tl;
+			var f3 = $bind(this,this.printComplexType);
+			var result3 = new Array(_g8.length);
+			var _g14 = 0;
+			var _g15 = _g8.length;
+			while(_g14 < _g15) {
+				var i3 = _g14++;
+				result3[i3] = f3(_g8[i3]);
 			}
 			return result3.join(" & ");
 		}
@@ -884,20 +817,13 @@ haxe_macro_Printer.prototype = {
 		var tmp5;
 		switch(_g3._hx_index) {
 		case 0:
-			var eo = _g3.e;
-			var t = _g3.t;
-			tmp5 = (field.access != null && Lambda.has(field.access,haxe_macro_Access.AFinal) ? "" : "var ") + ("" + field.name) + this.opt(t,$bind(this,this.printComplexType)," : ") + this.opt(eo,$bind(this,this.printExpr)," = ");
+			tmp5 = (field.access != null && Lambda.has(field.access,haxe_macro_Access.AFinal) ? "" : "var ") + ("" + field.name) + this.opt(_g3.t,$bind(this,this.printComplexType)," : ") + this.opt(_g3.e,$bind(this,this.printExpr)," = ");
 			break;
 		case 1:
-			var func = _g3.f;
-			tmp5 = "function " + field.name + this.printFunction(func);
+			tmp5 = "function " + field.name + this.printFunction(_g3.f);
 			break;
 		case 2:
-			var eo1 = _g3.e;
-			var t1 = _g3.t;
-			var set = _g3.set;
-			var get = _g3.get;
-			tmp5 = "var " + field.name + "(" + get + ", " + set + ")" + this.opt(t1,$bind(this,this.printComplexType)," : ") + this.opt(eo1,$bind(this,this.printExpr)," = ");
+			tmp5 = "var " + field.name + "(" + _g3.get + ", " + _g3.set + ")" + this.opt(_g3.t,$bind(this,this.printComplexType)," : ") + this.opt(_g3.e,$bind(this,this.printExpr)," = ");
 			break;
 		}
 		return tmp4 + tmp5;
@@ -997,83 +923,60 @@ haxe_macro_Printer.prototype = {
 			var _g = e.expr;
 			switch(_g._hx_index) {
 			case 0:
-				var c = _g.c;
-				return this.printConstant(c);
+				return this.printConstant(_g.c);
 			case 1:
-				var e2 = _g.e2;
-				var e1 = _g.e1;
-				return "" + this.printExpr(e1) + "[" + this.printExpr(e2) + "]";
+				return "" + this.printExpr(_g.e1) + "[" + this.printExpr(_g.e2) + "]";
 			case 2:
-				var e21 = _g.e2;
-				var e11 = _g.e1;
-				var op = _g.op;
-				return "" + this.printExpr(e11) + " " + this.printBinop(op) + " " + this.printExpr(e21);
+				return "" + this.printExpr(_g.e1) + " " + this.printBinop(_g.op) + " " + this.printExpr(_g.e2);
 			case 3:
-				var n = _g.field;
-				var e12 = _g.e;
-				return "" + this.printExpr(e12) + "." + n;
+				return "" + this.printExpr(_g.e) + "." + _g.field;
 			case 4:
-				var e13 = _g.e;
-				return "(" + this.printExpr(e13) + ")";
+				return "(" + this.printExpr(_g.e) + ")";
 			case 5:
-				var fl = _g.fields;
-				var result = new Array(fl.length);
-				var _g1 = 0;
-				var _g11 = fl.length;
-				while(_g1 < _g11) {
-					var i = _g1++;
-					result[i] = _gthis.printObjectField(fl[i]);
+				var _g1 = _g.fields;
+				var result = new Array(_g1.length);
+				var _g2 = 0;
+				var _g11 = _g1.length;
+				while(_g2 < _g11) {
+					var i = _g2++;
+					result[i] = _gthis.printObjectField(_g1[i]);
 				}
 				return "{ " + result.join(", ") + " }";
 			case 6:
-				var el = _g.values;
-				return "[" + this.printExprs(el,", ") + "]";
+				return "[" + this.printExprs(_g.values,", ") + "]";
 			case 7:
-				var el1 = _g.params;
-				var e14 = _g.e;
-				return "" + this.printExpr(e14) + "(" + this.printExprs(el1,", ") + ")";
+				return "" + this.printExpr(_g.e) + "(" + this.printExprs(_g.params,", ") + ")";
 			case 8:
-				var el2 = _g.params;
-				var tp = _g.t;
-				return "new " + this.printTypePath(tp) + "(" + this.printExprs(el2,", ") + ")";
+				return "new " + this.printTypePath(_g.t) + "(" + this.printExprs(_g.params,", ") + ")";
 			case 9:
 				var _g20 = _g.e;
 				var _g18 = _g.op;
 				if(_g.postFix) {
-					var e15 = _g20;
-					var op1 = _g18;
-					return this.printExpr(e15) + this.printUnop(op1);
+					return this.printExpr(_g20) + this.printUnop(_g18);
 				} else {
-					var e16 = _g20;
-					var op2 = _g18;
-					return this.printUnop(op2) + this.printExpr(e16);
+					return this.printUnop(_g18) + this.printExpr(_g20);
 				}
 				break;
 			case 10:
-				var vl = _g.vars;
+				var _g33 = _g.vars;
 				var f = $bind(this,this.printVar);
-				var result1 = new Array(vl.length);
-				var _g2 = 0;
-				var _g12 = vl.length;
-				while(_g2 < _g12) {
-					var i1 = _g2++;
-					result1[i1] = f(vl[i1]);
+				var result1 = new Array(_g33.length);
+				var _g3 = 0;
+				var _g12 = _g33.length;
+				while(_g3 < _g12) {
+					var i1 = _g3++;
+					result1[i1] = f(_g33[i1]);
 				}
 				return "var " + result1.join(", ");
 			case 11:
 				var _g22 = _g.f;
 				var _g21 = _g.kind;
 				if(_g21 == null) {
-					var func = _g22;
-					return "function" + this.printFunction(func);
+					return "function" + this.printFunction(_g22);
 				} else if(_g21._hx_index == 1) {
-					var func1 = _g22;
-					var inlined = _g21.inlined;
-					var no = _g21.name;
-					return (inlined ? "inline " : "") + ("function " + no) + this.printFunction(func1);
+					return (_g21.inlined ? "inline " : "") + ("function " + _g21.name) + this.printFunction(_g22);
 				} else {
-					var func2 = _g22;
-					return "function" + this.printFunction(func2);
+					return "function" + this.printFunction(_g22);
 				}
 				break;
 			case 12:
@@ -1081,124 +984,95 @@ haxe_macro_Printer.prototype = {
 				if(_g25.length == 0) {
 					return "{ }";
 				} else {
-					var el3 = _g25;
 					var old = this.tabs;
 					this.tabs += this.tabString;
-					var s = "{\n" + this.tabs + this.printExprs(el3,";\n" + this.tabs);
+					var s = "{\n" + this.tabs + this.printExprs(_g25,";\n" + this.tabs);
 					this.tabs = old;
 					return s + (";\n" + this.tabs + "}");
 				}
 				break;
 			case 13:
-				var e22 = _g.expr;
-				var e17 = _g.it;
-				return "for (" + this.printExpr(e17) + ") " + this.printExpr(e22);
+				return "for (" + this.printExpr(_g.it) + ") " + this.printExpr(_g.expr);
 			case 14:
 				var _g13 = _g.eelse;
 				var _g121 = _g.eif;
 				var _g111 = _g.econd;
 				if(_g13 == null) {
-					var econd = _g111;
-					var eif = _g121;
-					return "if (" + this.printExpr(econd) + ") " + this.printExpr(eif);
+					return "if (" + this.printExpr(_g111) + ") " + this.printExpr(_g121);
 				} else {
-					var econd1 = _g111;
-					var eif1 = _g121;
-					var eelse = _g13;
-					return "if (" + this.printExpr(econd1) + ") " + this.printExpr(eif1) + " else " + this.printExpr(eelse);
+					return "if (" + this.printExpr(_g111) + ") " + this.printExpr(_g121) + " else " + this.printExpr(_g13);
 				}
 				break;
 			case 15:
 				var _g35 = _g.e;
 				var _g34 = _g.econd;
 				if(_g.normalWhile) {
-					var econd2 = _g34;
-					var e18 = _g35;
-					return "while (" + this.printExpr(econd2) + ") " + this.printExpr(e18);
+					return "while (" + this.printExpr(_g34) + ") " + this.printExpr(_g35);
 				} else {
-					var econd3 = _g34;
-					var e19 = _g35;
-					return "do " + this.printExpr(e19) + " while (" + this.printExpr(econd3) + ")";
+					return "do " + this.printExpr(_g35) + " while (" + this.printExpr(_g34) + ")";
 				}
 				break;
 			case 16:
-				var edef = _g.edef;
-				var cl = _g.cases;
-				var e110 = _g.e;
+				var _g32 = _g.edef;
+				var _g31 = _g.cases;
 				var old1 = this.tabs;
 				this.tabs += this.tabString;
-				var s1 = "switch " + this.printExpr(e110) + " {\n" + this.tabs;
-				var result2 = new Array(cl.length);
-				var _g3 = 0;
-				var _g14 = cl.length;
-				while(_g3 < _g14) {
-					var i2 = _g3++;
-					var c1 = cl[i2];
-					result2[i2] = "case " + _gthis.printExprs(c1.values,", ") + (c1.guard != null ? " if (" + _gthis.printExpr(c1.guard) + "):" : ":") + (c1.expr != null ? _gthis.opt(c1.expr,$bind(_gthis,_gthis.printExpr)) + ";" : "");
+				var s1 = "switch " + this.printExpr(_g.e) + " {\n" + this.tabs;
+				var result2 = new Array(_g31.length);
+				var _g4 = 0;
+				var _g14 = _g31.length;
+				while(_g4 < _g14) {
+					var i2 = _g4++;
+					var c = _g31[i2];
+					result2[i2] = "case " + _gthis.printExprs(c.values,", ") + (c.guard != null ? " if (" + _gthis.printExpr(c.guard) + "):" : ":") + (c.expr != null ? _gthis.opt(c.expr,$bind(_gthis,_gthis.printExpr)) + ";" : "");
 				}
 				var s2 = s1 + result2.join("\n" + this.tabs);
-				if(edef != null) {
-					s2 += "\n" + this.tabs + "default:" + (edef.expr == null ? "" : this.printExpr(edef) + ";");
+				if(_g32 != null) {
+					s2 += "\n" + this.tabs + "default:" + (_g32.expr == null ? "" : this.printExpr(_g32) + ";");
 				}
 				this.tabs = old1;
 				return s2 + ("\n" + this.tabs + "}");
 			case 17:
-				var cl1 = _g.catches;
-				var e111 = _g.e;
-				var tmp = "try " + this.printExpr(e111);
-				var result3 = new Array(cl1.length);
-				var _g4 = 0;
-				var _g15 = cl1.length;
-				while(_g4 < _g15) {
-					var i3 = _g4++;
-					var c2 = cl1[i3];
-					result3[i3] = " catch(" + c2.name + ":" + _gthis.printComplexType(c2.type) + ") " + _gthis.printExpr(c2.expr);
+				var _g29 = _g.catches;
+				var tmp = "try " + this.printExpr(_g.e);
+				var result3 = new Array(_g29.length);
+				var _g5 = 0;
+				var _g15 = _g29.length;
+				while(_g5 < _g15) {
+					var i3 = _g5++;
+					var c1 = _g29[i3];
+					result3[i3] = " catch(" + c1.name + ":" + _gthis.printComplexType(c1.type) + ") " + _gthis.printExpr(c1.expr);
 				}
 				return tmp + result3.join("");
 			case 18:
-				var eo = _g.e;
-				return "return" + this.opt(eo,$bind(this,this.printExpr)," ");
+				return "return" + this.opt(_g.e,$bind(this,this.printExpr)," ");
 			case 19:
 				return "break";
 			case 20:
 				return "continue";
 			case 21:
-				var e112 = _g.e;
-				return "untyped " + this.printExpr(e112);
+				return "untyped " + this.printExpr(_g.e);
 			case 22:
-				var e113 = _g.e;
-				return "throw " + this.printExpr(e113);
+				return "throw " + this.printExpr(_g.e);
 			case 23:
+				var _g51 = _g.t;
 				var _g41 = _g.e;
-				var cto = _g.t;
-				var e114 = _g41;
-				if(cto != null) {
-					return "cast(" + this.printExpr(e114) + ", " + this.printComplexType(cto) + ")";
+				if(_g51 != null) {
+					return "cast(" + this.printExpr(_g41) + ", " + this.printComplexType(_g51) + ")";
 				} else {
-					var e115 = _g41;
-					return "cast " + this.printExpr(e115);
+					return "cast " + this.printExpr(_g41);
 				}
 				break;
 			case 24:
-				var _g43 = _g.displayKind;
-				var e116 = _g.e;
-				return "#DISPLAY(" + this.printExpr(e116) + ")";
+				return "#DISPLAY(" + this.printExpr(_g.e) + ")";
 			case 25:
-				var tp1 = _g.t;
-				return "#DISPLAY(" + this.printTypePath(tp1) + ")";
+				return "#DISPLAY(" + this.printTypePath(_g.t) + ")";
 			case 26:
-				var eelse1 = _g.eelse;
-				var eif2 = _g.eif;
-				var econd4 = _g.econd;
-				return "" + this.printExpr(econd4) + " ? " + this.printExpr(eif2) + " : " + this.printExpr(eelse1);
+				return "" + this.printExpr(_g.econd) + " ? " + this.printExpr(_g.eif) + " : " + this.printExpr(_g.eelse);
 			case 27:
-				var ct = _g.t;
-				var e117 = _g.e;
-				return "(" + this.printExpr(e117) + " : " + this.printComplexType(ct) + ")";
+				return "(" + this.printExpr(_g.e) + " : " + this.printComplexType(_g.t) + ")";
 			case 28:
-				var e118 = _g.e;
-				var meta = _g.s;
-				return this.printMetadata(meta) + " " + this.printExpr(e118);
+				return this.printMetadata(_g.s) + " " + this.printExpr(_g.e);
 			}
 		}
 	}
@@ -1332,19 +1206,12 @@ haxe_macro_Printer.prototype = {
 					var str11;
 					switch(_g14._hx_index) {
 					case 0:
-						var _g7 = _g14.e;
-						var t1 = _g14.t;
-						str11 = field.name + this.opt(t1,$bind(this,this.printComplexType),":");
+						str11 = field.name + this.opt(_g14.t,$bind(this,this.printComplexType),":");
 						break;
 					case 1:
-						var func = _g14.f;
-						str11 = field.name + this.printFunction(func);
+						str11 = field.name + this.printFunction(_g14.f);
 						break;
 					case 2:
-						var _g51 = _g14.e;
-						var _g41 = _g14.t;
-						var _g31 = _g14.set;
-						var _g22 = _g14.get;
 						throw new js__$Boot_HaxeError("FProp is invalid for TDEnum.");
 					}
 					_g4.push(str10 + str11 + ";");
@@ -1369,59 +1236,46 @@ haxe_macro_Printer.prototype = {
 					str13 = "";
 				}
 				var str14 = str12 + str13 + " = {\n";
-				var _g8 = [];
+				var _g7 = [];
 				var _g16 = 0;
-				var _g23 = t.fields;
-				while(_g16 < _g23.length) {
-					var f4 = _g23[_g16];
-					++_g16;
-					_g8.push(this.tabs + this.printField(f4) + ";");
-				}
-				str4 = str14 + _g8.join("\n") + "\n}";
+				var _g22 = t.fields;
+				while(_g16 < _g22.length) _g7.push(this.tabs + this.printField(_g22[_g16++]) + ";");
+				str4 = str14 + _g7.join("\n") + "\n}";
 				break;
 			case 2:
-				var isFinal = _g2.isFinal;
-				var isInterface = _g2.isInterface;
-				var interfaces = _g2.interfaces;
-				var superClass = _g2.superClass;
-				var str15 = (isFinal ? "final " : "") + (isInterface ? "interface " : "class ") + t.name;
+				var _g31 = _g2.isInterface;
+				var _g23 = _g2.interfaces;
+				var _g17 = _g2.superClass;
+				var str15 = (_g2.isFinal ? "final " : "") + (_g31 ? "interface " : "class ") + t.name;
 				var str16;
 				if(t.params != null && t.params.length > 0) {
 					var _this4 = t.params;
-					var f5 = $bind(this,this.printTypeParamDecl);
+					var f4 = $bind(this,this.printTypeParamDecl);
 					var result4 = new Array(_this4.length);
-					var _g9 = 0;
-					var _g17 = _this4.length;
-					while(_g9 < _g17) {
-						var i4 = _g9++;
-						result4[i4] = f5(_this4[i4]);
+					var _g8 = 0;
+					var _g18 = _this4.length;
+					while(_g8 < _g18) {
+						var i4 = _g8++;
+						result4[i4] = f4(_this4[i4]);
 					}
 					str16 = "<" + result4.join(", ") + ">";
 				} else {
 					str16 = "";
 				}
-				var str17 = str15 + str16 + (superClass != null ? " extends " + this.printTypePath(superClass) : "");
+				var str17 = str15 + str16 + (_g17 != null ? " extends " + this.printTypePath(_g17) : "");
 				var str18;
-				if(interfaces != null) {
+				if(_g23 != null) {
 					var str19;
-					if(isInterface) {
-						var _g10 = [];
-						var _g18 = 0;
-						while(_g18 < interfaces.length) {
-							var tp = interfaces[_g18];
-							++_g18;
-							_g10.push(" extends " + this.printTypePath(tp));
-						}
-						str19 = _g10;
+					if(_g31) {
+						var _g9 = [];
+						var _g19 = 0;
+						while(_g19 < _g23.length) _g9.push(" extends " + this.printTypePath(_g23[_g19++]));
+						str19 = _g9;
 					} else {
-						var _g19 = [];
+						var _g10 = [];
 						var _g110 = 0;
-						while(_g110 < interfaces.length) {
-							var tp1 = interfaces[_g110];
-							++_g110;
-							_g19.push(" implements " + this.printTypePath(tp1));
-						}
-						str19 = _g19;
+						while(_g110 < _g23.length) _g10.push(" implements " + this.printTypePath(_g23[_g110++]));
+						str19 = _g10;
 					}
 					str18 = str19.join("");
 				} else {
@@ -1431,26 +1285,22 @@ haxe_macro_Printer.prototype = {
 				var _g20 = [];
 				var _g111 = 0;
 				var _g24 = t.fields;
-				while(_g111 < _g24.length) {
-					var f6 = _g24[_g111];
-					++_g111;
-					_g20.push(this.tabs + this.printFieldWithDelimiter(f6));
-				}
+				while(_g111 < _g24.length) _g20.push(this.tabs + this.printFieldWithDelimiter(_g24[_g111++]));
 				str4 = str20 + _g20.join("\n") + "\n}";
 				break;
 			case 3:
-				var ct = _g2.t;
+				var _g81 = _g2.t;
 				var str21 = "typedef " + t.name;
 				var str22;
 				if(t.params != null && t.params.length > 0) {
 					var _this5 = t.params;
-					var f7 = $bind(this,this.printTypeParamDecl);
+					var f5 = $bind(this,this.printTypeParamDecl);
 					var result5 = new Array(_this5.length);
 					var _g25 = 0;
 					var _g112 = _this5.length;
 					while(_g25 < _g112) {
 						var i5 = _g25++;
-						result5[i5] = f7(_this5[i5]);
+						result5[i5] = f5(_this5[i5]);
 					}
 					str22 = "<" + result5.join(", ") + ">";
 				} else {
@@ -1458,78 +1308,63 @@ haxe_macro_Printer.prototype = {
 				}
 				var str23 = str21 + str22 + " = ";
 				var str24;
-				switch(ct._hx_index) {
+				switch(_g81._hx_index) {
 				case 2:
-					var fields = ct.fields;
-					str24 = this.printStructure(fields);
+					str24 = this.printStructure(_g81.fields);
 					break;
 				case 4:
-					var fields1 = ct.fields;
-					var tpl = ct.p;
-					str24 = this.printExtension(tpl,fields1);
+					str24 = this.printExtension(_g81.p,_g81.fields);
 					break;
 				default:
-					str24 = this.printComplexType(ct);
+					str24 = this.printComplexType(_g81);
 				}
 				str4 = str23 + str24 + ";";
 				break;
 			case 4:
-				var to = _g2.to;
-				var from = _g2.from;
-				var tthis = _g2.tthis;
+				var _g71 = _g2.to;
+				var _g61 = _g2.from;
+				var _g51 = _g2.tthis;
 				var str25 = "abstract " + t.name;
 				var str26;
 				if(t.params != null && t.params.length > 0) {
 					var _this6 = t.params;
-					var f8 = $bind(this,this.printTypeParamDecl);
+					var f6 = $bind(this,this.printTypeParamDecl);
 					var result6 = new Array(_this6.length);
 					var _g26 = 0;
 					var _g113 = _this6.length;
 					while(_g26 < _g113) {
 						var i6 = _g26++;
-						result6[i6] = f8(_this6[i6]);
+						result6[i6] = f6(_this6[i6]);
 					}
 					str26 = "<" + result6.join(", ") + ">";
 				} else {
 					str26 = "";
 				}
-				var str27 = str25 + str26 + (tthis == null ? "" : "(" + this.printComplexType(tthis) + ")");
+				var str27 = str25 + str26 + (_g51 == null ? "" : "(" + this.printComplexType(_g51) + ")");
 				var str28;
-				if(from == null) {
+				if(_g61 == null) {
 					str28 = "";
 				} else {
 					var _g27 = [];
 					var _g114 = 0;
-					while(_g114 < from.length) {
-						var f9 = from[_g114];
-						++_g114;
-						_g27.push(" from " + this.printComplexType(f9));
-					}
+					while(_g114 < _g61.length) _g27.push(" from " + this.printComplexType(_g61[_g114++]));
 					str28 = _g27.join("");
 				}
 				var str29 = str27 + str28;
 				var str30;
-				if(to == null) {
+				if(_g71 == null) {
 					str30 = "";
 				} else {
 					var _g28 = [];
 					var _g115 = 0;
-					while(_g115 < to.length) {
-						var t2 = to[_g115];
-						++_g115;
-						_g28.push(" to " + this.printComplexType(t2));
-					}
+					while(_g115 < _g71.length) _g28.push(" to " + this.printComplexType(_g71[_g115++]));
 					str30 = _g28.join("");
 				}
 				var str31 = str29 + str30 + " {\n";
 				var _g29 = [];
 				var _g116 = 0;
 				var _g210 = t.fields;
-				while(_g116 < _g210.length) {
-					var f10 = _g210[_g116];
-					++_g116;
-					_g29.push(this.tabs + this.printFieldWithDelimiter(f10));
-				}
+				while(_g116 < _g210.length) _g29.push(this.tabs + this.printFieldWithDelimiter(_g210[_g116++]));
 				str4 = str31 + _g29.join("\n") + "\n}";
 				break;
 			}
@@ -1544,34 +1379,13 @@ haxe_macro_Printer.prototype = {
 		var tmp1;
 		switch(_g._hx_index) {
 		case 0:
-			var _g6 = _g.e;
-			var _g5 = _g.t;
 			tmp1 = ";";
 			break;
 		case 1:
-			var _g7 = _g.f;
-			var _g11 = _g7.ret;
-			var _g10 = _g7.params;
-			var _g9 = _g7.expr;
-			var _g8 = _g7.args;
-			if(_g9 == null) {
-				tmp1 = ";";
-			} else {
-				var _g13 = _g9.pos;
-				var _g12 = _g9.expr;
-				if(_g12._hx_index == 12) {
-					var _g14 = _g12.exprs;
-					tmp1 = "";
-				} else {
-					tmp1 = ";";
-				}
-			}
+			var _g9 = _g.f.expr;
+			tmp1 = _g9 == null ? ";" : _g9.expr._hx_index == 12 ? "" : ";";
 			break;
 		case 2:
-			var _g4 = _g.e;
-			var _g3 = _g.t;
-			var _g2 = _g.set;
-			var _g1 = _g.get;
 			tmp1 = ";";
 			break;
 		}
@@ -1752,51 +1566,37 @@ haxeparser_TokenDefPrinter.__name__ = true;
 haxeparser_TokenDefPrinter.toString = function(def) {
 	switch(def._hx_index) {
 	case 0:
-		var k = def.k;
-		return HxOverrides.substr($hxEnums[k.__enum__].__constructs__[k._hx_index],3,null).toLowerCase();
+		var _g4 = def.k;
+		return HxOverrides.substr($hxEnums[_g4.__enum__].__constructs__[_g4._hx_index],3,null).toLowerCase();
 	case 1:
 		var _g5 = def.c;
 		switch(_g5._hx_index) {
 		case 0:
-			var s = _g5.v;
-			return s;
+			return _g5.v;
 		case 1:
-			var s1 = _g5.f;
-			return s1;
+			return _g5.f;
 		case 2:
-			var _g12 = _g5.kind;
-			var s2 = _g5.s;
-			return "\"" + s2 + "\"";
+			return "\"" + _g5.s + "\"";
 		case 3:
-			var s3 = _g5.s;
-			return s3;
+			return _g5.s;
 		case 4:
-			var opt = _g5.opt;
-			var r = _g5.r;
-			return "~/" + r + "/" + opt;
+			return "~/" + _g5.r + "/" + _g5.opt;
 		}
 		break;
 	case 2:
-		var s4 = def.s;
-		return "#" + s4;
+		return "#" + def.s;
 	case 3:
-		var s5 = def.s;
-		return "$" + s5;
+		return "$" + def.s;
 	case 4:
-		var op = def.op;
-		return new haxe_macro_Printer("").printUnop(op);
+		return new haxe_macro_Printer("").printUnop(def.op);
 	case 5:
-		var op1 = def.op;
-		return new haxe_macro_Printer("").printBinop(op1);
+		return new haxe_macro_Printer("").printBinop(def.op);
 	case 6:
-		var s6 = def.s;
-		return "/*" + s6 + "*/";
+		return "/*" + def.s + "*/";
 	case 7:
-		var s7 = def.s;
-		return "//" + s7;
+		return "//" + def.s;
 	case 8:
-		var s8 = def.s;
-		return "" + s8 + "...";
+		return "" + def.s + "...";
 	case 9:
 		return ";";
 	case 10:
@@ -1953,8 +1753,7 @@ var hxparse_LexEngine = function(patterns) {
 	var pid = 0;
 	var _g = 0;
 	while(_g < patterns.length) {
-		var p = patterns[_g];
-		++_g;
+		var p = patterns[_g++];
 		var id = pid++;
 		var f = new hxparse__$LexEngine_Node(this.uid++,id);
 		var n = this.initNode(p,f,id);
@@ -1965,8 +1764,7 @@ var hxparse_LexEngine = function(patterns) {
 };
 hxparse_LexEngine.__name__ = true;
 hxparse_LexEngine.parse = function(pattern) {
-	var this1 = haxe_io_Bytes.ofString(pattern);
-	var p = hxparse_LexEngine.parseInner(this1);
+	var p = hxparse_LexEngine.parseInner(haxe_io_Bytes.ofString(pattern));
 	if(p == null) {
 		throw new js__$Boot_HaxeError("Invalid pattern '" + pattern + "'");
 	}
@@ -1981,27 +1779,21 @@ hxparse_LexEngine.next = function(a,b) {
 };
 hxparse_LexEngine.plus = function(r) {
 	if(r._hx_index == 4) {
-		var r2 = r.p2;
-		var r1 = r.p1;
-		return hxparse__$LexEngine_Pattern.Next(r1,hxparse_LexEngine.plus(r2));
+		return hxparse__$LexEngine_Pattern.Next(r.p1,hxparse_LexEngine.plus(r.p2));
 	} else {
 		return hxparse__$LexEngine_Pattern.Plus(r);
 	}
 };
 hxparse_LexEngine.star = function(r) {
 	if(r._hx_index == 4) {
-		var r2 = r.p2;
-		var r1 = r.p1;
-		return hxparse__$LexEngine_Pattern.Next(r1,hxparse_LexEngine.star(r2));
+		return hxparse__$LexEngine_Pattern.Next(r.p1,hxparse_LexEngine.star(r.p2));
 	} else {
 		return hxparse__$LexEngine_Pattern.Star(r);
 	}
 };
 hxparse_LexEngine.opt = function(r) {
 	if(r._hx_index == 4) {
-		var r2 = r.p2;
-		var r1 = r.p1;
-		return hxparse__$LexEngine_Pattern.Next(r1,hxparse_LexEngine.opt(r2));
+		return hxparse__$LexEngine_Pattern.Next(r.p1,hxparse_LexEngine.opt(r.p2));
 	} else {
 		return hxparse__$LexEngine_Pattern.Choice(r,hxparse__$LexEngine_Pattern.Empty);
 	}
@@ -2032,8 +1824,10 @@ hxparse_LexEngine.cunion = function(ca,cb) {
 	var i = 0;
 	var j = 0;
 	var out = [];
-	var a = ca[i++];
-	var b = cb[j++];
+	i = 1;
+	var a = ca[0];
+	j = 1;
+	var b = cb[0];
 	while(true) {
 		if(a == null) {
 			out.push(b);
@@ -2185,11 +1979,7 @@ hxparse_LexEngine.parseInner = function(pattern,i,pDepth) {
 				}
 				var g = [];
 				var _g = 0;
-				while(_g < acc.length) {
-					var k = acc[_g];
-					++_g;
-					g = hxparse_LexEngine.cunion(g,[k]);
-				}
+				while(_g < acc.length) g = hxparse_LexEngine.cunion(g,[acc[_g++]]);
 				if(not) {
 					g = hxparse_LexEngine.cdiff(hxparse_LexEngine.ALL_CHARS,g);
 				}
@@ -2228,9 +2018,7 @@ hxparse_LexEngine.prototype = {
 		var buf_b = "";
 		var _g = 0;
 		while(_g < nodes.length) {
-			var n = nodes[_g];
-			++_g;
-			buf_b += Std.string(n.id);
+			buf_b += Std.string(nodes[_g++].id);
 			buf_b += String.fromCodePoint(45);
 		}
 		var key = buf_b;
@@ -2260,24 +2048,20 @@ hxparse_LexEngine.prototype = {
 				++_g11;
 				var _g12 = chr.min;
 				var _g21 = chr.max + 1;
-				while(_g12 < _g21) {
-					var i = _g12++;
-					s.trans[i] = target;
-				}
+				while(_g12 < _g21) s.trans[_g12++] = target;
 			}
 		}
 		var setFinal = function() {
 			var _g22 = 0;
 			var _g3 = _gthis.finals;
 			while(_g22 < _g3.length) {
-				var f = _g3[_g22];
-				++_g22;
+				var f = _g3[_g22++];
 				var _g23 = 0;
 				while(_g23 < nodes.length) {
-					var n1 = nodes[_g23];
+					var n = nodes[_g23];
 					++_g23;
-					if(n1 == f) {
-						s.finalId = n1.pid;
+					if(n == f) {
+						s.finalId = n.pid;
 						return;
 					}
 				}
@@ -2292,15 +2076,9 @@ hxparse_LexEngine.prototype = {
 		var tl = [];
 		var _g = 0;
 		while(_g < nodes.length) {
-			var n = nodes[_g];
-			++_g;
 			var _g1 = 0;
-			var _g11 = n.trans;
-			while(_g1 < _g11.length) {
-				var t = _g11[_g1];
-				++_g1;
-				tl.push(t);
-			}
+			var _g11 = nodes[_g++].trans;
+			while(_g1 < _g11.length) tl.push(_g11[_g1++]);
 		}
 		tl.sort(function(t1,t2) {
 			return t1.n.id - t2.n.id;
@@ -2324,30 +2102,28 @@ hxparse_LexEngine.prototype = {
 		var allStates = new haxe_ds_List();
 		var _g3 = 0;
 		while(_g3 < tl.length) {
-			var t3 = tl[_g3];
+			var t = tl[_g3];
 			++_g3;
 			var states = new haxe_ds_List();
-			states.push({ chars : hxparse_LexEngine.cdiff(t3.chars,allChars), n : [t3.n]});
+			states.push({ chars : hxparse_LexEngine.cdiff(t.chars,allChars), n : [t.n]});
 			var _g3_head = allStates.h;
 			while(_g3_head != null) {
 				var val = _g3_head.item;
 				_g3_head = _g3_head.next;
-				var s = val;
-				var nodes1 = s.n.slice();
-				nodes1.push(t3.n);
-				states.push({ chars : hxparse_LexEngine.cinter(s.chars,t3.chars), n : nodes1});
-				states.push({ chars : hxparse_LexEngine.cdiff(s.chars,t3.chars), n : s.n});
+				var nodes1 = val.n.slice();
+				nodes1.push(t.n);
+				states.push({ chars : hxparse_LexEngine.cinter(val.chars,t.chars), n : nodes1});
+				states.push({ chars : hxparse_LexEngine.cdiff(val.chars,t.chars), n : val.n});
 			}
 			var _g4_head = states.h;
 			while(_g4_head != null) {
 				var val1 = _g4_head.item;
 				_g4_head = _g4_head.next;
-				var s1 = val1;
-				if(s1.chars.length == 0) {
-					states.remove(s1);
+				if(val1.chars.length == 0) {
+					states.remove(val1);
 				}
 			}
-			allChars = hxparse_LexEngine.cunion(allChars,t3.chars);
+			allChars = hxparse_LexEngine.cunion(allChars,t.chars);
 			allStates = states;
 		}
 		var states1 = [];
@@ -2355,18 +2131,17 @@ hxparse_LexEngine.prototype = {
 		while(_g4_head1 != null) {
 			var val2 = _g4_head1.item;
 			_g4_head1 = _g4_head1.next;
-			var s2 = val2;
-			states1.push({ chars : s2.chars, n : this.addNodes([],s2.n)});
+			states1.push({ chars : val2.chars, n : this.addNodes([],val2.n)});
 		}
-		states1.sort(function(s11,s21) {
-			var a = s11.chars.length;
-			var b = s21.chars.length;
+		states1.sort(function(s1,s2) {
+			var a = s1.chars.length;
+			var b = s2.chars.length;
 			var _g5 = 0;
 			var _g6 = a < b ? a : b;
 			while(_g5 < _g6) {
 				var i1 = _g5++;
-				var a1 = s11.chars[i1];
-				var b1 = s21.chars[i1];
+				var a1 = s1.chars[i1];
+				var b1 = s2.chars[i1];
 				if(a1.min != b1.min) {
 					return b1.min - a1.min;
 				}
@@ -2383,23 +2158,15 @@ hxparse_LexEngine.prototype = {
 	}
 	,addNode: function(nodes,n) {
 		var _g = 0;
-		while(_g < nodes.length) {
-			var n2 = nodes[_g];
-			++_g;
-			if(n == n2) {
-				return;
-			}
+		while(_g < nodes.length) if(n == nodes[_g++]) {
+			return;
 		}
 		nodes.push(n);
 		this.addNodes(nodes,n.epsilon);
 	}
 	,addNodes: function(nodes,add) {
 		var _g = 0;
-		while(_g < add.length) {
-			var n = add[_g];
-			++_g;
-			this.addNode(nodes,n);
-		}
+		while(_g < add.length) this.addNode(nodes,add[_g++]);
 		return nodes;
 	}
 	,initNode: function(p,finalId,pid) {
@@ -2407,38 +2174,30 @@ hxparse_LexEngine.prototype = {
 		case 0:
 			return finalId;
 		case 1:
-			var c = p.c;
 			var n = new hxparse__$LexEngine_Node(this.uid++,pid);
-			n.trans.push({ chars : c, n : finalId});
+			n.trans.push({ chars : p.c, n : finalId});
 			return n;
 		case 2:
-			var p1 = p.p;
 			var n1 = new hxparse__$LexEngine_Node(this.uid++,pid);
-			var an = this.initNode(p1,n1,pid);
+			var an = this.initNode(p.p,n1,pid);
 			n1.epsilon.push(an);
 			n1.epsilon.push(finalId);
 			return n1;
 		case 3:
-			var p2 = p.p;
 			var n2 = new hxparse__$LexEngine_Node(this.uid++,pid);
-			var an1 = this.initNode(p2,n2,pid);
+			var an1 = this.initNode(p.p,n2,pid);
 			n2.epsilon.push(an1);
 			n2.epsilon.push(finalId);
 			return an1;
 		case 4:
-			var b = p.p2;
-			var a = p.p1;
-			return this.initNode(a,this.initNode(b,finalId,pid),pid);
+			return this.initNode(p.p1,this.initNode(p.p2,finalId,pid),pid);
 		case 5:
-			var b1 = p.p2;
-			var a1 = p.p1;
 			var n3 = new hxparse__$LexEngine_Node(this.uid++,pid);
-			n3.epsilon.push(this.initNode(a1,finalId,pid));
-			n3.epsilon.push(this.initNode(b1,finalId,pid));
+			n3.epsilon.push(this.initNode(p.p1,finalId,pid));
+			n3.epsilon.push(this.initNode(p.p2,finalId,pid));
 			return n3;
 		case 6:
-			var p3 = p.p;
-			return this.initNode(p3,finalId,pid);
+			return this.initNode(p.p,finalId,pid);
 		}
 	}
 };
@@ -2451,17 +2210,6 @@ var hxparse__$LexEngine_Pattern = $hxEnums["hxparse._LexEngine.Pattern"] = { __e
 	,Choice: ($_=function(p1,p2) { return {_hx_index:5,p1:p1,p2:p2,__enum__:"hxparse._LexEngine.Pattern",toString:$estr}; },$_.__params__ = ["p1","p2"],$_)
 	,Group: ($_=function(p) { return {_hx_index:6,p:p,__enum__:"hxparse._LexEngine.Pattern",toString:$estr}; },$_.__params__ = ["p"],$_)
 };
-var js__$Boot_HaxeError = function(val) {
-	Error.call(this);
-	this.val = val;
-	if(Error.captureStackTrace) {
-		Error.captureStackTrace(this,js__$Boot_HaxeError);
-	}
-};
-js__$Boot_HaxeError.__name__ = true;
-js__$Boot_HaxeError.__super__ = Error;
-js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
-});
 var js_Boot = function() { };
 js_Boot.__name__ = true;
 js_Boot.__string_rec = function(o,s) {
@@ -2753,61 +2501,46 @@ haxeparser_HaxeCondParser.prototype = $extend(hxparse_Parser_$hxparse_$LexerToke
 		var _g1 = _g.tok;
 		switch(_g1._hx_index) {
 		case 0:
-			var p = _g2;
-			var k = _g1.k;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			return this.parseMacroIdent(allowOp,haxeparser_HaxeParser.keywordString(k),p);
+			return this.parseMacroIdent(allowOp,haxeparser_HaxeParser.keywordString(_g1.k),_g2);
 		case 1:
 			var _g4 = _g1.c;
 			switch(_g4._hx_index) {
 			case 0:
-				var p1 = _g2;
-				var s = _g4.v;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(s)), pos : p1}};
+				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(_g4.v)), pos : _g2}};
 			case 1:
-				var p2 = _g2;
-				var s1 = _g4.f;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(s1)), pos : p2}};
+				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(_g4.f)), pos : _g2}};
 			case 2:
-				var _g9 = _g4.kind;
-				var p3 = _g2;
-				var s2 = _g4.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(s2)), pos : p3}};
+				return { tk : haxe_ds_Option.None, expr : { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(_g4.s)), pos : _g2}};
 			case 3:
-				var p4 = _g2;
-				var t = _g4.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.parseMacroIdent(allowOp,t,p4);
+				return this.parseMacroIdent(allowOp,_g4.s,_g2);
 			default:
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
 			break;
 		case 4:
-			var p5 = _g2;
-			var op = _g1.op;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var o = this.parseMacroCond(allowOp);
-			return { tk : o.tk, expr : haxeparser_HaxeParser.makeUnop(op,o.expr,p5)};
+			return { tk : o.tk, expr : haxeparser_HaxeParser.makeUnop(_g1.op,o.expr,_g2)};
 		case 18:
-			var p11 = _g2;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var o1 = this.parseMacroCond(true);
 			var _g3 = this.peek(0);
 			if(_g3.tok._hx_index == 19) {
-				var p21 = _g3.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var e = { expr : haxe_macro_ExprDef.EParenthesis(o1.expr), pos : haxeparser_HaxeParser.punion(p11,p21)};
+				var e = { expr : haxe_macro_ExprDef.EParenthesis(o1.expr), pos : haxeparser_HaxeParser.punion(_g2,_g3.pos)};
 				if(allowOp) {
 					return this.parseMacroOp(e);
 				} else {
@@ -2831,35 +2564,32 @@ haxeparser_HaxeCondParser.prototype = $extend(hxparse_Parser_$hxparse_$LexerToke
 	}
 	,parseMacroOp: function(e) {
 		var _g = this.peek(0);
-		var _g2 = _g.pos;
 		var _g1 = _g.tok;
 		if(_g1._hx_index == 5) {
-			var op = _g1.op;
+			var _g3 = _g1.op;
+			var op = _g3;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var _g3 = this.peek(0);
-			var _g21 = _g3.pos;
-			var _g11 = _g3.tok;
+			var _g11 = this.peek(0).tok;
 			if(_g11._hx_index == 5) {
 				if(_g11.op._hx_index == 4) {
-					if(op == haxe_macro_Binop.OpGt) {
+					if(_g3 == haxe_macro_Binop.OpGt) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						op = haxe_macro_Binop.OpGte;
 					} else {
-						op = op;
+						op = _g3;
 					}
 				} else {
-					op = op;
+					op = _g3;
 				}
 			} else {
-				op = op;
+				op = _g3;
 			}
 			var o = this.parseMacroCond(true);
 			return { tk : o.tk, expr : haxeparser_HaxeParser.makeBinop(op,e,o.expr)};
 		} else {
-			var tk = _g;
-			return { tk : haxe_ds_Option.Some(tk), expr : e};
+			return { tk : haxe_ds_Option.Some(_g), expr : e};
 		}
 	}
 });
@@ -2903,8 +2633,7 @@ haxeparser_HaxeTokenSource.prototype = {
 						this.skipstates[this.skipstates.length - 1] = 2;
 						break;
 					case 1:
-						var o = this.condParser.parseMacroCond(false);
-						var s = this.isTrue(this.eval(o.expr)) ? 0 : 1;
+						var s = this.isTrue(this.eval(this.condParser.parseMacroCond(false).expr)) ? 0 : 1;
 						this.skipstates[this.skipstates.length - 1] = s;
 						break;
 					case 2:
@@ -2923,14 +2652,11 @@ haxeparser_HaxeTokenSource.prototype = {
 				case "error":
 					switch(state) {
 					case 0:
-						var nextTok = this.lexerToken();
-						var _g1 = nextTok.tok;
+						var _g1 = this.lexerToken().tok;
 						if(_g1._hx_index == 1) {
 							var _g11 = _g1.c;
 							if(_g11._hx_index == 2) {
-								var _g3 = _g11.kind;
-								var str = _g11.s;
-								throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.SharpError(str),tk.pos));
+								throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.SharpError(_g11.s),tk.pos));
 							} else {
 								throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.Unimplemented,tk.pos));
 							}
@@ -2947,8 +2673,7 @@ haxeparser_HaxeTokenSource.prototype = {
 					switch(state) {
 					case 0:
 						this.mstack.push(tk.pos);
-						var o1 = this.condParser.parseMacroCond(false);
-						var s1 = this.isTrue(this.eval(o1.expr)) ? 0 : 1;
+						var s1 = this.isTrue(this.eval(this.condParser.parseMacroCond(false).expr)) ? 0 : 1;
 						this.skipstates.push(s1);
 						break;
 					case 1:case 2:
@@ -2970,10 +2695,8 @@ haxeparser_HaxeTokenSource.prototype = {
 				}
 				break;
 			case 6:
-				var _g31 = _g.s;
 				break;
 			case 7:
-				var _g2 = _g.s;
 				break;
 			case 22:
 				if(state == 0) {
@@ -2992,8 +2715,7 @@ haxeparser_HaxeTokenSource.prototype = {
 	,deepSkip: function() {
 		var lvl = 1;
 		while(true) {
-			var tk = this.lexerToken();
-			var _g = tk.tok;
+			var _g = this.lexerToken().tok;
 			switch(_g._hx_index) {
 			case 2:
 				switch(_g.s) {
@@ -3053,9 +2775,7 @@ haxeparser_HaxeTokenSource.prototype = {
 			break;
 		case 1:
 			if(b._hx_index == 1) {
-				var a1 = a.b;
-				var b1 = b.b;
-				return Reflect.compare(a1,b1);
+				return Reflect.compare(a.b,b.b);
 			} else {
 				return 0;
 			}
@@ -3064,13 +2784,9 @@ haxeparser_HaxeTokenSource.prototype = {
 			var _g2 = a.f;
 			switch(b._hx_index) {
 			case 2:
-				var a2 = _g2;
-				var b2 = b.f;
-				return Reflect.compare(a2,b2);
+				return Reflect.compare(_g2,b.f);
 			case 3:
-				var a3 = _g2;
-				var b3 = b.s;
-				return Reflect.compare(a3,parseFloat(b3));
+				return Reflect.compare(_g2,parseFloat(b.s));
 			default:
 				return 0;
 			}
@@ -3079,13 +2795,9 @@ haxeparser_HaxeTokenSource.prototype = {
 			var _g5 = a.s;
 			switch(b._hx_index) {
 			case 2:
-				var a4 = _g5;
-				var b4 = b.f;
-				return Reflect.compare(parseFloat(a4),b4);
+				return Reflect.compare(parseFloat(_g5),b.f);
 			case 3:
-				var a5 = _g5;
-				var b5 = b.s;
-				return Reflect.compare(a5,b5);
+				return Reflect.compare(_g5,b.s);
 			default:
 				return 0;
 			}
@@ -3099,20 +2811,16 @@ haxeparser_HaxeTokenSource.prototype = {
 			var _g8 = _g.c;
 			switch(_g8._hx_index) {
 			case 0:
-				var f = _g8.v;
-				return haxeparser_SmallType.SFloat(parseFloat(f));
+				return haxeparser_SmallType.SFloat(parseFloat(_g8.v));
 			case 1:
-				var f1 = _g8.f;
-				return haxeparser_SmallType.SFloat(parseFloat(f1));
+				return haxeparser_SmallType.SFloat(parseFloat(_g8.f));
 			case 2:
-				var _g13 = _g8.kind;
-				var s = _g8.s;
-				return haxeparser_SmallType.SString(s);
+				return haxeparser_SmallType.SString(_g8.s);
 			case 3:
-				var s1 = _g8.s;
+				var _g9 = _g8.s;
 				var _this = this.defines;
-				if(__map_reserved[s1] != null ? _this.existsReserved(s1) : _this.h.hasOwnProperty(s1)) {
-					return haxeparser_SmallType.SString(s1);
+				if(__map_reserved[_g9] != null ? _this.existsReserved(_g9) : _this.h.hasOwnProperty(_g9)) {
+					return haxeparser_SmallType.SString(_g9);
 				} else {
 					return haxeparser_SmallType.SNull;
 				}
@@ -3127,22 +2835,13 @@ haxeparser_HaxeTokenSource.prototype = {
 			var _g5 = _g.op;
 			switch(_g5._hx_index) {
 			case 14:
-				var e2 = _g7;
-				var e1 = _g6;
-				return haxeparser_SmallType.SBool(this.isTrue(this.eval(e1)) && this.isTrue(this.eval(e2)));
+				return haxeparser_SmallType.SBool(this.isTrue(this.eval(_g6)) && this.isTrue(this.eval(_g7)));
 			case 15:
-				var e21 = _g7;
-				var e11 = _g6;
-				return haxeparser_SmallType.SBool(this.isTrue(this.eval(e11)) || this.isTrue(this.eval(e21)));
+				return haxeparser_SmallType.SBool(this.isTrue(this.eval(_g6)) || this.isTrue(this.eval(_g7)));
 			default:
-				var e22 = _g7;
-				var e12 = _g6;
-				var op = _g5;
-				var v1 = this.eval(e12);
-				var v2 = this.eval(e22);
-				var cmp = this.compare(v1,v2);
+				var cmp = this.compare(this.eval(_g6),this.eval(_g7));
 				var val;
-				switch(op._hx_index) {
+				switch(_g5._hx_index) {
 				case 5:
 					val = cmp == 0;
 					break;
@@ -3168,13 +2867,10 @@ haxeparser_HaxeTokenSource.prototype = {
 			}
 			break;
 		case 4:
-			var e3 = _g.e;
-			return this.eval(e3);
+			return this.eval(_g.e);
 		case 9:
-			var _g3 = _g.postFix;
 			if(_g.op._hx_index == 2) {
-				var e4 = _g.e;
-				return haxeparser_SmallType.SBool(!this.isTrue(this.eval(e4)));
+				return haxeparser_SmallType.SBool(!this.isTrue(this.eval(_g.e)));
 			} else {
 				throw new js__$Boot_HaxeError("Invalid condition expression");
 			}
@@ -3212,9 +2908,7 @@ hxparse_Parser_$haxeparser_$HaxeTokenSource_$haxeparser_$Token.prototype = {
 		try {
 			return f();
 		} catch( e ) {
-			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-			if(((e1) instanceof hxparse_NoMatch)) {
-				var e2 = e1;
+			if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof hxparse_NoMatch)) {
 				return null;
 			} else {
 				throw e;
@@ -3226,9 +2920,7 @@ hxparse_Parser_$haxeparser_$HaxeTokenSource_$haxeparser_$Token.prototype = {
 		while(true) try {
 			acc.push(f());
 		} catch( e ) {
-			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-			if(((e1) instanceof hxparse_NoMatch)) {
-				var e2 = e1;
+			if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof hxparse_NoMatch)) {
 				return acc;
 			} else {
 				throw e;
@@ -3245,9 +2937,7 @@ var haxeparser_HaxeParser = function(input,sourceName) {
 	} else {
 		_this.h["true"] = true;
 	}
-	var lexer = new haxeparser_HaxeLexer(input,sourceName);
-	var ts = new haxeparser_HaxeTokenSource(lexer,this.defines);
-	hxparse_Parser_$haxeparser_$HaxeTokenSource_$haxeparser_$Token.call(this,ts);
+	hxparse_Parser_$haxeparser_$HaxeTokenSource_$haxeparser_$Token.call(this,new haxeparser_HaxeTokenSource(new haxeparser_HaxeLexer(input,sourceName),this.defines));
 	this.inMacro = false;
 	this.doc = "";
 };
@@ -3282,18 +2972,12 @@ haxeparser_HaxeParser.isLowerIdent = function(s) {
 haxeparser_HaxeParser.isPostfix = function(e,u) {
 	switch(u._hx_index) {
 	case 0:case 1:
-		var _g = e.expr;
-		switch(_g._hx_index) {
+		switch(e.expr._hx_index) {
 		case 0:
-			var _g5 = _g.c;
 			return true;
 		case 1:
-			var _g2 = _g.e2;
-			var _g1 = _g.e1;
 			return true;
 		case 3:
-			var _g4 = _g.field;
-			var _g3 = _g.e;
 			return true;
 		default:
 			return false;
@@ -3304,36 +2988,33 @@ haxeparser_HaxeParser.isPostfix = function(e,u) {
 	}
 };
 haxeparser_HaxeParser.precedence = function(op) {
-	var left = true;
-	var right = false;
 	switch(op._hx_index) {
 	case 0:case 3:
-		return { p : 3, left : left};
+		return { p : 3, left : true};
 	case 1:case 2:
-		return { p : 2, left : left};
+		return { p : 2, left : true};
 	case 4:
-		return { p : 11, left : right};
+		return { p : 11, left : false};
 	case 5:case 6:case 7:case 8:case 9:case 10:
-		return { p : 6, left : left};
+		return { p : 6, left : true};
 	case 11:case 12:case 13:
-		return { p : 5, left : left};
+		return { p : 5, left : true};
 	case 14:
-		return { p : 8, left : left};
+		return { p : 8, left : true};
 	case 15:
-		return { p : 9, left : left};
+		return { p : 9, left : true};
 	case 16:case 17:case 18:
-		return { p : 4, left : left};
+		return { p : 4, left : true};
 	case 19:
-		return { p : 1, left : left};
+		return { p : 1, left : true};
 	case 20:
-		var _g = op.op;
-		return { p : 11, left : right};
+		return { p : 11, left : false};
 	case 21:
-		return { p : 7, left : left};
+		return { p : 7, left : true};
 	case 22:
-		return { p : 10, left : left};
+		return { p : 10, left : true};
 	case 23:
-		return { p : 0, left : right};
+		return { p : 0, left : false};
 	}
 };
 haxeparser_HaxeParser.isNotAssign = function(op) {
@@ -3341,7 +3022,6 @@ haxeparser_HaxeParser.isNotAssign = function(op) {
 	case 4:
 		return false;
 	case 20:
-		var _g = op.op;
 		return false;
 	default:
 		return true;
@@ -3352,8 +3032,7 @@ haxeparser_HaxeParser.isDollarIdent = function(e) {
 	if(_g._hx_index == 0) {
 		var _g1 = _g.c;
 		if(_g1._hx_index == 3) {
-			var n = _g1.s;
-			if(HxOverrides.cca(n,0) == 36) {
+			if(HxOverrides.cca(_g1.s,0) == 36) {
 				return true;
 			} else {
 				return false;
@@ -3367,9 +3046,8 @@ haxeparser_HaxeParser.isDollarIdent = function(e) {
 };
 haxeparser_HaxeParser.swap = function(op1,op2) {
 	var i1 = haxeparser_HaxeParser.precedence(op1);
-	var i2 = haxeparser_HaxeParser.precedence(op2);
 	if(i1.left) {
-		return i1.p <= i2.p;
+		return i1.p <= haxeparser_HaxeParser.precedence(op2).p;
 	} else {
 		return false;
 	}
@@ -3378,23 +3056,20 @@ haxeparser_HaxeParser.makeBinop = function(op,e,e2) {
 	var _g = e2.expr;
 	switch(_g._hx_index) {
 	case 2:
-		var _e2 = _g.e2;
-		var _e = _g.e1;
-		var _op = _g.op;
-		if(haxeparser_HaxeParser.swap(op,_op)) {
-			var _e1 = haxeparser_HaxeParser.makeBinop(op,e,_e);
-			return { expr : haxe_macro_ExprDef.EBinop(_op,_e1,_e2), pos : haxeparser_HaxeParser.punion(_e1.pos,_e2.pos)};
+		var _g3 = _g.e2;
+		var _g1 = _g.op;
+		if(haxeparser_HaxeParser.swap(op,_g1)) {
+			var _e = haxeparser_HaxeParser.makeBinop(op,e,_g.e1);
+			return { expr : haxe_macro_ExprDef.EBinop(_g1,_e,_g3), pos : haxeparser_HaxeParser.punion(_e.pos,_g3.pos)};
 		} else {
 			return { expr : haxe_macro_ExprDef.EBinop(op,e,e2), pos : haxeparser_HaxeParser.punion(e.pos,e2.pos)};
 		}
 		break;
 	case 26:
-		var e3 = _g.eelse;
-		var e21 = _g.eif;
-		var e1 = _g.econd;
+		var _g6 = _g.eelse;
 		if(haxeparser_HaxeParser.isNotAssign(op)) {
-			var e4 = haxeparser_HaxeParser.makeBinop(op,e,e1);
-			return { expr : haxe_macro_ExprDef.ETernary(e4,e21,e3), pos : haxeparser_HaxeParser.punion(e4.pos,e3.pos)};
+			var e1 = haxeparser_HaxeParser.makeBinop(op,e,_g.econd);
+			return { expr : haxe_macro_ExprDef.ETernary(e1,_g.eif,_g6), pos : haxeparser_HaxeParser.punion(e1.pos,_g6.pos)};
 		} else {
 			return { expr : haxe_macro_ExprDef.EBinop(op,e,e2), pos : haxeparser_HaxeParser.punion(e.pos,e2.pos)};
 		}
@@ -3407,15 +3082,10 @@ haxeparser_HaxeParser.makeUnop = function(op,e,p1) {
 	var _g = e.expr;
 	switch(_g._hx_index) {
 	case 2:
-		var e2 = _g.e2;
-		var e1 = _g.e1;
-		var bop = _g.op;
-		return { expr : haxe_macro_ExprDef.EBinop(bop,haxeparser_HaxeParser.makeUnop(op,e1,p1),e2), pos : haxeparser_HaxeParser.punion(p1,e1.pos)};
+		var _g2 = _g.e1;
+		return { expr : haxe_macro_ExprDef.EBinop(_g.op,haxeparser_HaxeParser.makeUnop(op,_g2,p1),_g.e2), pos : haxeparser_HaxeParser.punion(p1,_g2.pos)};
 	case 26:
-		var e3 = _g.eelse;
-		var e21 = _g.eif;
-		var e11 = _g.econd;
-		return { expr : haxe_macro_ExprDef.ETernary(haxeparser_HaxeParser.makeUnop(op,e11,p1),e21,e3), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
+		return { expr : haxe_macro_ExprDef.ETernary(haxeparser_HaxeParser.makeUnop(op,_g.econd,p1),_g.eif,_g.eelse), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
 	default:
 		return { expr : haxe_macro_ExprDef.EUnop(op,false,e), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
 	}
@@ -3424,24 +3094,16 @@ haxeparser_HaxeParser.makeMeta = function(name,params,e,p1) {
 	var _g = e.expr;
 	switch(_g._hx_index) {
 	case 2:
-		var e2 = _g.e2;
-		var e1 = _g.e1;
-		var bop = _g.op;
-		return { expr : haxe_macro_ExprDef.EBinop(bop,haxeparser_HaxeParser.makeMeta(name,params,e1,p1),e2), pos : haxeparser_HaxeParser.punion(p1,e1.pos)};
+		var _g2 = _g.e1;
+		return { expr : haxe_macro_ExprDef.EBinop(_g.op,haxeparser_HaxeParser.makeMeta(name,params,_g2,p1),_g.e2), pos : haxeparser_HaxeParser.punion(p1,_g2.pos)};
 	case 26:
-		var e3 = _g.eelse;
-		var e21 = _g.eif;
-		var e11 = _g.econd;
-		return { expr : haxe_macro_ExprDef.ETernary(haxeparser_HaxeParser.makeMeta(name,params,e11,p1),e21,e3), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
+		return { expr : haxe_macro_ExprDef.ETernary(haxeparser_HaxeParser.makeMeta(name,params,_g.econd,p1),_g.eif,_g.eelse), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
 	default:
-		var tmp = haxeparser_HaxeParser.punion(p1,e.pos);
-		return { expr : haxe_macro_ExprDef.EMeta({ name : name, params : params, pos : p1},e), pos : tmp};
+		return { expr : haxe_macro_ExprDef.EMeta({ name : name, params : params, pos : p1},e), pos : haxeparser_HaxeParser.punion(p1,e.pos)};
 	}
 };
 haxeparser_HaxeParser.makeIs = function(e,t,p,p_is) {
-	var e_is = { expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("Std")), pos : haxeparser_HaxeParser.nullPos},"is"), pos : p_is};
-	var e2 = haxeparser_HaxeParser.exprOfTypePath(t.pack,t.name,p);
-	return { expr : haxe_macro_ExprDef.ECall(e_is,[e,e2]), pos : p};
+	return { expr : haxe_macro_ExprDef.ECall({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("Std")), pos : haxeparser_HaxeParser.nullPos},"is"), pos : p_is},[e,haxeparser_HaxeParser.exprOfTypePath(t.pack,t.name,p)]), pos : p};
 };
 haxeparser_HaxeParser.exprOfTypePath = function(pack,name,p) {
 	if(pack.length <= 0) {
@@ -3449,11 +3111,7 @@ haxeparser_HaxeParser.exprOfTypePath = function(pack,name,p) {
 	}
 	var e = { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent(pack.pop())), pos : p};
 	var _g = 0;
-	while(_g < pack.length) {
-		var pa = pack[_g];
-		++_g;
-		e = { expr : haxe_macro_ExprDef.EField(e,pa), pos : p};
-	}
+	while(_g < pack.length) e = { expr : haxe_macro_ExprDef.EField(e,pack[_g++]), pos : p};
 	return { expr : haxe_macro_ExprDef.EField(e,name), pos : p};
 };
 haxeparser_HaxeParser.apush = function(a,t) {
@@ -3470,19 +3128,14 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var acc = [];
 		while(true) try {
 			acc.push(f());
-			var _g = this.peek(0);
-			var _g2 = _g.pos;
-			var sep2 = _g.tok;
-			if(sep2 == sep) {
+			if(this.peek(0).tok == sep) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
 		} catch( e ) {
-			var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-			if(((e1) instanceof hxparse_NoMatch)) {
-				var e2 = e1;
+			if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof hxparse_NoMatch)) {
 				break;
 			} else {
 				throw e;
@@ -3496,11 +3149,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(_g1._hx_index == 1) {
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var p = _g.pos;
-				var i = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { name : i, pos : p};
+				return { name : _g3.s, pos : _g.pos};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
@@ -3516,21 +3167,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 1:
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var p = _g2;
-				var i = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { name : i, pos : p};
+				return { name : _g3.s, pos : _g2};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
 			break;
 		case 3:
-			var p1 = _g2;
-			var i1 = _g1.s;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			return { name : "$" + i1, pos : p1};
+			return { name : "$" + _g1.s, pos : _g2};
 		default:
 			throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 		}
@@ -3543,31 +3190,27 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 1:
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var p = _g2;
-				var i = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { name : i, pos : p};
+				return { name : _g3.s, pos : _g2};
 			} else {
 				var _g4 = this.peek(0);
 				var _g11 = _g4.tok;
 				if(_g11._hx_index == 0) {
 					if(_g11.k._hx_index == 40) {
-						var p1 = _g4.pos;
 						if(pack.length > 0) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							return { name : "macro", pos : p1};
+							return { name : "macro", pos : _g4.pos};
 						} else {
 							var _g5 = this.peek(0);
 							var _g12 = _g5.tok;
 							if(_g12._hx_index == 0) {
 								if(_g12.k._hx_index == 25) {
-									var p2 = _g5.pos;
 									if(pack.length > 0) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										return { name : "extern", pos : p2};
+										return { name : "extern", pos : _g5.pos};
 									} else {
 										throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 									}
@@ -3583,11 +3226,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						var _g13 = _g6.tok;
 						if(_g13._hx_index == 0) {
 							if(_g13.k._hx_index == 25) {
-								var p3 = _g6.pos;
 								if(pack.length > 0) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									return { name : "extern", pos : p3};
+									return { name : "extern", pos : _g6.pos};
 								} else {
 									throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 								}
@@ -3603,11 +3245,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					var _g14 = _g7.tok;
 					if(_g14._hx_index == 0) {
 						if(_g14.k._hx_index == 25) {
-							var p4 = _g7.pos;
 							if(pack.length > 0) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								return { name : "extern", pos : p4};
+								return { name : "extern", pos : _g7.pos};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 							}
@@ -3621,31 +3262,27 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			}
 			break;
 		case 3:
-			var p5 = _g2;
-			var i1 = _g1.s;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			return { name : "$" + i1, pos : p5};
+			return { name : "$" + _g1.s, pos : _g2};
 		default:
 			var _g8 = this.peek(0);
 			var _g15 = _g8.tok;
 			if(_g15._hx_index == 0) {
 				if(_g15.k._hx_index == 40) {
-					var p6 = _g8.pos;
 					if(pack.length > 0) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return { name : "macro", pos : p6};
+						return { name : "macro", pos : _g8.pos};
 					} else {
 						var _g9 = this.peek(0);
 						var _g16 = _g9.tok;
 						if(_g16._hx_index == 0) {
 							if(_g16.k._hx_index == 25) {
-								var p7 = _g9.pos;
 								if(pack.length > 0) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									return { name : "extern", pos : p7};
+									return { name : "extern", pos : _g9.pos};
 								} else {
 									throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 								}
@@ -3661,11 +3298,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					var _g17 = _g10.tok;
 					if(_g17._hx_index == 0) {
 						if(_g17.k._hx_index == 25) {
-							var p8 = _g10.pos;
 							if(pack.length > 0) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								return { name : "extern", pos : p8};
+								return { name : "extern", pos : _g10.pos};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 							}
@@ -3681,11 +3317,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				var _g19 = _g18.tok;
 				if(_g19._hx_index == 0) {
 					if(_g19.k._hx_index == 25) {
-						var p9 = _g18.pos;
 						if(pack.length > 0) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							return { name : "extern", pos : p9};
+							return { name : "extern", pos : _g18.pos};
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 						}
@@ -3700,15 +3335,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,propertyIdent: function() {
 		try {
-			var i = this.ident();
-			return i.name;
+			return this.ident().name;
 		} catch( _ ) {
-			var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-			if(((_1) instanceof hxparse_NoMatch)) {
-				var _2 = _1;
-				var _g = this.peek(0);
-				var _g2 = _g.pos;
-				var _g1 = _g.tok;
+			if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+				var _g1 = this.peek(0).tok;
 				if(_g1._hx_index == 0) {
 					switch(_g1.k._hx_index) {
 					case 16:
@@ -3738,10 +3368,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var po;
 		var _g = this.peek(0);
 		if(_g.tok._hx_index == 20) {
-			var p = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			po = p;
+			po = _g.pos;
 		} else {
 			po = null;
 		}
@@ -3755,20 +3384,18 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(this.last.tok == haxeparser_TokenDef.BrClose) {
 			var _g = this.peek(0);
 			if(_g.tok._hx_index == 9) {
-				var p = _g.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return p;
+				return _g.pos;
 			} else {
 				return this.last.pos;
 			}
 		} else {
 			var _g1 = this.peek(0);
 			if(_g1.tok._hx_index == 9) {
-				var p1 = _g1.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return p1;
+				return _g1.pos;
 			} else {
 				var pos = this.last.pos;
 				if(this.doResume) {
@@ -3794,17 +3421,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var name = optName();
 		var tl = this.parseConstraintParams();
 		var hl = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseClassHerit));
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 16) {
+		if(this.peek(0).tok._hx_index == 16) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var fl = this.parseClassFields(false,flags.pos);
 			var result = new Array(cflags.length);
-			var _g1 = 0;
-			var _g11 = cflags.length;
-			while(_g1 < _g11) {
-				var i = _g1++;
+			var _g = 0;
+			var _g1 = cflags.length;
+			while(_g < _g1) {
+				var i = _g++;
 				result[i] = cflags[i].fst;
 			}
 			return { decl : haxeparser_TypeDef.EClass({ name : name, doc : doc, meta : meta, params : tl, flags : result.concat(flags.flags).concat(hl), data : fl.fields}), pos : haxeparser_HaxeParser.punion(flags.pos,fl.pos)};
@@ -3817,10 +3442,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var p2;
 		var _g = this.peek(0);
 		if(_g.tok._hx_index == 17) {
-			var p21 = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			p2 = p21;
+			p2 = _g.pos;
 		} else {
 			throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 		}
@@ -3832,14 +3456,11 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseMetaParams: function(pname) {
 		var _g = this.peek(0);
 		if(_g.tok._hx_index == 18) {
-			var p = _g.pos;
-			if(p.min == pname.max) {
+			if(_g.pos.min == pname.max) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var params = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.expr));
-				var _g1 = this.peek(0);
-				var _g2 = _g1.pos;
-				if(_g1.tok._hx_index == 19) {
+				if(this.peek(0).tok._hx_index == 19) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					return params;
@@ -3856,10 +3477,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseMetaEntry: function() {
 		var _g = this.peek(0);
 		if(_g.tok._hx_index == 21) {
-			var p1 = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var name = this.parseMetaName(p1);
+			var name = this.parseMetaName(_g.pos);
 			var params = this.parseMetaParams(name.pos);
 			return { name : name.name, params : params, pos : name.pos};
 		} else {
@@ -3871,9 +3491,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			var entry = this.parseMetaEntry();
 			return haxeparser_HaxeParser.apush(this.parseMeta(),entry);
 		} catch( _ ) {
-			var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-			if(((_1) instanceof hxparse_NoMatch)) {
-				var _2 = _1;
+			if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 				return [];
 			} else {
 				throw _;
@@ -3887,20 +3505,16 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var _g1 = _g.tok;
 		switch(_g1._hx_index) {
 		case 0:
-			var p = _g2;
-			var k = _g1.k;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			part = { name : haxeparser_KeywordPrinter.toString(k), pos : haxeparser_HaxeParser.punion(p,p1)};
+			part = { name : haxeparser_KeywordPrinter.toString(_g1.k), pos : haxeparser_HaxeParser.punion(_g2,p1)};
 			break;
 		case 1:
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var p2 = _g2;
-				var i = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				part = { name : i, pos : haxeparser_HaxeParser.punion(p2,p1)};
+				part = { name : _g3.s, pos : haxeparser_HaxeParser.punion(_g2,p1)};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
@@ -3911,36 +3525,30 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		acc.unshift(part);
 		var _g6 = this.peek(0);
 		if(_g6.tok._hx_index == 10) {
-			var p11 = _g6.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var part1 = this.parseMetaName2(p11,acc);
-			return part1;
+			return this.parseMetaName2(_g6.pos,acc);
 		} else {
 			return acc;
 		}
 	}
 	,parseMetaName: function(p1) {
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		if(_g.tok._hx_index == 11) {
-			var p = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			try {
-				var names = this.parseMetaName2(p,[]);
-				return this.metaNameConcat(names,false);
+				return this.metaNameConcat(this.parseMetaName2(_g2,[]),false);
 			} catch( _ ) {
-				var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-				if(((_1) instanceof hxparse_NoMatch)) {
-					var _2 = _1;
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 					throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 				} else {
 					throw _;
 				}
 			}
 		} else {
-			var names1 = this.parseMetaName2(p1,[]);
-			return this.metaNameConcat(names1,true);
+			return this.metaNameConcat(this.parseMetaName2(p1,[]),true);
 		}
 	}
 	,metaNameConcat: function(names,custom) {
@@ -3970,15 +3578,13 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(_g1._hx_index == 0) {
 			switch(_g1.k._hx_index) {
 			case 1:
-				var p = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { flags : [], pos : p};
+				return { flags : [], pos : _g2};
 			case 27:
-				var p1 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return { flags : haxeparser_HaxeParser.apush([],haxeparser_ClassFlag.HInterface), pos : p1};
+				return { flags : haxeparser_HaxeParser.apush([],haxeparser_ClassFlag.HInterface), pos : _g2};
 			default:
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
@@ -3987,25 +3593,19 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseTypeHint: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 11) {
+		if(this.peek(0).tok._hx_index == 11) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var t = this.parseComplexType();
-			return t;
+			return this.parseComplexType();
 		} else {
 			return null;
 		}
 	}
 	,parseTypeOpt: function() {
 		try {
-			var t = this.parseTypeHint();
-			return t;
+			return this.parseTypeHint();
 		} catch( _ ) {
-			var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-			if(((_1) instanceof hxparse_NoMatch)) {
-				var _2 = _1;
+			if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 				return null;
 			} else {
 				throw _;
@@ -4018,68 +3618,54 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseComplexTypeMaybeNamed: function(allowNamed) {
 		var _gthis = this;
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		if(_g.tok._hx_index == 18) {
-			var p1 = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var tl = this.psep(haxeparser_TokenDef.Comma,function() {
 				return _gthis.parseComplexTypeMaybeNamed(true);
 			});
-			var _g1 = this.peek(0);
-			if(_g1.tok._hx_index == 19) {
-				var p2 = _g1.pos;
+			if(this.peek(0).tok._hx_index == 19) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				switch(tl.length) {
 				case 0:
-					return this.parseFunctionTypeNext(tl,p1);
+					return this.parseFunctionTypeNext(tl,_g2);
 				case 1:
-					var _g2 = tl[0];
-					if(_g2._hx_index == 6) {
-						var _g21 = _g2.t;
-						var _g11 = _g2.n;
-						return this.parseFunctionTypeNext(tl,p1);
+					var _g1 = tl[0];
+					if(_g1._hx_index == 6) {
+						return this.parseFunctionTypeNext(tl,_g2);
 					} else {
-						var t = _g2;
-						var t1 = haxe_macro_ComplexType.TParent(t);
-						return this.parseComplexTypeNext(t1);
+						return this.parseComplexTypeNext(haxe_macro_ComplexType.TParent(_g1));
 					}
 					break;
 				default:
-					return this.parseFunctionTypeNext(tl,p1);
+					return this.parseFunctionTypeNext(tl,_g2);
 				}
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 		} else {
-			var t2 = this.parseComplexTypeInner(allowNamed);
-			return this.parseComplexTypeNext(t2);
+			return this.parseComplexTypeNext(this.parseComplexTypeInner(allowNamed));
 		}
 	}
 	,parseFunctionTypeNext: function(tl,p1) {
-		var _g = this.peek(0);
-		if(_g.tok._hx_index == 12) {
-			var pa = _g.pos;
+		if(this.peek(0).tok._hx_index == 12) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var tret = this.parseComplexTypeInner(false);
-			return haxe_macro_ComplexType.TFunction(tl,tret);
+			return haxe_macro_ComplexType.TFunction(tl,this.parseComplexTypeInner(false));
 		} else {
 			throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 		}
 	}
 	,parseStructuralExtension: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 5) {
 			if(_g1.op._hx_index == 7) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var t = this.parseTypePath();
-				var _g3 = this.peek(0);
-				var _g21 = _g3.pos;
-				if(_g3.tok._hx_index == 13) {
+				if(this.peek(0).tok._hx_index == 13) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					return t;
@@ -4098,61 +3684,46 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var _g2 = _g.pos;
 		switch(_g.tok._hx_index) {
 		case 16:
-			var p1 = _g2;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			try {
-				var l = this.parseTypeAnonymous(false);
-				return haxe_macro_ComplexType.TAnonymous(l);
+				return haxe_macro_ComplexType.TAnonymous(this.parseTypeAnonymous(false));
 			} catch( _ ) {
-				var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-				if(((_1) instanceof hxparse_NoMatch)) {
-					var _2 = _1;
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 					try {
 						var t = this.parseStructuralExtension();
 						var tl = this.parseRepeat($bind(this,this.parseStructuralExtension));
 						tl.unshift(t);
 						try {
-							var l1 = this.parseTypeAnonymous(false);
-							return haxe_macro_ComplexType.TExtend(tl,l1);
-						} catch( _3 ) {
-							var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-							if(((_4) instanceof hxparse_NoMatch)) {
-								var _5 = _4;
+							return haxe_macro_ComplexType.TExtend(tl,this.parseTypeAnonymous(false));
+						} catch( _1 ) {
+							if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
 								try {
-									var fl = this.parseClassFields(true,p1);
-									return haxe_macro_ComplexType.TExtend(tl,fl.fields);
-								} catch( _6 ) {
-									var _7 = ((_6) instanceof js__$Boot_HaxeError) ? _6.val : _6;
-									if(((_7) instanceof hxparse_NoMatch)) {
-										var _8 = _7;
+									return haxe_macro_ComplexType.TExtend(tl,this.parseClassFields(true,_g2).fields);
+								} catch( _2 ) {
+									if(((((_2) instanceof js__$Boot_HaxeError) ? _2.val : _2) instanceof hxparse_NoMatch)) {
 										throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 									} else {
-										throw _6;
+										throw _2;
 									}
 								}
 							} else {
-								throw _3;
+								throw _1;
 							}
 						}
-					} catch( _9 ) {
-						var _10 = ((_9) instanceof js__$Boot_HaxeError) ? _9.val : _9;
-						if(((_10) instanceof hxparse_NoMatch)) {
-							var _11 = _10;
+					} catch( _3 ) {
+						if(((((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3) instanceof hxparse_NoMatch)) {
 							try {
-								var l2 = this.parseClassFields(true,p1);
-								return haxe_macro_ComplexType.TAnonymous(l2.fields);
-							} catch( _12 ) {
-								var _13 = ((_12) instanceof js__$Boot_HaxeError) ? _12.val : _12;
-								if(((_13) instanceof hxparse_NoMatch)) {
-									var _14 = _13;
+								return haxe_macro_ComplexType.TAnonymous(this.parseClassFields(true,_g2).fields);
+							} catch( _4 ) {
+								if(((((_4) instanceof js__$Boot_HaxeError) ? _4.val : _4) instanceof hxparse_NoMatch)) {
 									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 								} else {
-									throw _12;
+									throw _4;
 								}
 							}
 						} else {
-							throw _9;
+							throw _3;
 						}
 					}
 				} else {
@@ -4164,9 +3735,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var t1 = this.parseComplexType();
-			var _g1 = this.peek(0);
-			var _g21 = _g1.pos;
-			if(_g1.tok._hx_index == 19) {
+			if(this.peek(0).tok._hx_index == 19) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				return haxe_macro_ComplexType.TParent(t1);
@@ -4177,30 +3746,23 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 20:
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var t2 = this.parseComplexTypeInner(allowNamed);
-			return haxe_macro_ComplexType.TOptional(t2);
+			return haxe_macro_ComplexType.TOptional(this.parseComplexTypeInner(allowNamed));
 		default:
 			try {
 				var n = this.dollarIdent();
-				var _g3 = this.peek(0);
-				var _g22 = _g3.pos;
-				if(_g3.tok._hx_index == 11) {
+				if(this.peek(0).tok._hx_index == 11) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var t3 = this.parseComplexType();
-					return haxe_macro_ComplexType.TNamed(n.name,t3);
+					var t2 = this.parseComplexType();
+					return haxe_macro_ComplexType.TNamed(n.name,t2);
 				} else {
-					var t4 = this.parseTypePath2([],n);
-					return haxe_macro_ComplexType.TPath(t4);
+					return haxe_macro_ComplexType.TPath(this.parseTypePath2([],n));
 				}
-			} catch( _15 ) {
-				var _16 = ((_15) instanceof js__$Boot_HaxeError) ? _15.val : _15;
-				if(((_16) instanceof hxparse_NoMatch)) {
-					var _17 = _16;
-					var t5 = this.parseTypePath();
-					return haxe_macro_ComplexType.TPath(t5);
+			} catch( _5 ) {
+				if(((((_5) instanceof js__$Boot_HaxeError) ? _5.val : _5) instanceof hxparse_NoMatch)) {
+					return haxe_macro_ComplexType.TPath(this.parseTypePath());
 				} else {
-					throw _15;
+					throw _5;
 				}
 			}
 		}
@@ -4209,14 +3771,11 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		return this.parseTypePath1([]);
 	}
 	,parseTypePath1: function(pack) {
-		var ident = this.dollarIdentMacro(pack);
-		return this.parseTypePath2(pack,ident);
+		return this.parseTypePath2(pack,this.dollarIdentMacro(pack));
 	}
 	,parseTypePath2: function(pack,ident) {
 		if(haxeparser_HaxeParser.isLowerIdent(ident.name)) {
-			var _g = this.peek(0);
-			var _g2 = _g.pos;
-			switch(_g.tok._hx_index) {
+			switch(this.peek(0).tok._hx_index) {
 			case 9:
 				this.last = this.token.elt;
 				this.token = this.token.next;
@@ -4230,22 +3789,18 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			}
 		} else {
 			var sub;
-			var _g1 = this.peek(0);
-			var _g21 = _g1.pos;
-			if(_g1.tok._hx_index == 10) {
+			if(this.peek(0).tok._hx_index == 10) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g3 = this.peek(0);
-				var _g22 = _g3.pos;
-				var _g11 = _g3.tok;
-				if(_g11._hx_index == 1) {
-					var _g31 = _g11.c;
-					if(_g31._hx_index == 3) {
-						var name = _g31.s;
-						if(!haxeparser_HaxeParser.isLowerIdent(name)) {
+				var _g1 = this.peek(0).tok;
+				if(_g1._hx_index == 1) {
+					var _g3 = _g1.c;
+					if(_g3._hx_index == 3) {
+						var _g4 = _g3.s;
+						if(!haxeparser_HaxeParser.isLowerIdent(_g4)) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							sub = name;
+							sub = _g4;
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
@@ -4259,19 +3814,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				sub = null;
 			}
 			var params;
-			var _g32 = this.peek(0);
-			var _g5 = _g32.pos;
-			var _g4 = _g32.tok;
-			if(_g4._hx_index == 5) {
-				if(_g4.op._hx_index == 9) {
+			var _g41 = this.peek(0).tok;
+			if(_g41._hx_index == 5) {
+				if(_g41.op._hx_index == 9) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var l = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseTypePathOrConst));
-					var _g33 = this.peek(0);
-					var _g51 = _g33.pos;
-					var _g41 = _g33.tok;
-					if(_g41._hx_index == 5) {
-						if(_g41.op._hx_index == 7) {
+					var _g42 = this.peek(0).tok;
+					if(_g42._hx_index == 5) {
+						if(_g42.op._hx_index == 7) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							params = l;
@@ -4292,18 +3843,18 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,typeName: function() {
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		var _g1 = _g.tok;
 		if(_g1._hx_index == 1) {
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var p = _g.pos;
-				var name = _g3.s;
+				var _g4 = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				if(haxeparser_HaxeParser.isLowerIdent(name)) {
-					throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.Custom("Type name should start with an uppercase letter"),p));
+				if(haxeparser_HaxeParser.isLowerIdent(_g4)) {
+					throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.Custom("Type name should start with an uppercase letter"),_g2));
 				} else {
-					return name;
+					return _g4;
 				}
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
@@ -4314,47 +3865,38 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,parseTypePathOrConst: function() {
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		if(_g.tok._hx_index == 14) {
-			var p1 = _g.pos;
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var l = this.parseArrayDecl();
 			var _g1 = this.peek(0);
 			if(_g1.tok._hx_index == 15) {
-				var p2 = _g1.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return haxe_macro_TypeParam.TPExpr({ expr : haxe_macro_ExprDef.EArrayDecl(l), pos : haxeparser_HaxeParser.punion(p1,p2)});
+				return haxe_macro_TypeParam.TPExpr({ expr : haxe_macro_ExprDef.EArrayDecl(l), pos : haxeparser_HaxeParser.punion(_g2,_g1.pos)});
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 		} else {
 			try {
-				var t = this.parseComplexType();
-				return haxe_macro_TypeParam.TPType(t);
+				return haxe_macro_TypeParam.TPType(this.parseComplexType());
 			} catch( _ ) {
-				var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-				if(((_1) instanceof hxparse_NoMatch)) {
-					var _2 = _1;
-					var _g2 = this.peek(0);
-					var _g11 = _g2.tok;
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+					var _g3 = this.peek(0);
+					var _g11 = _g3.tok;
 					if(_g11._hx_index == 1) {
-						var p = _g2.pos;
-						var c = _g11.c;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return haxe_macro_TypeParam.TPExpr({ expr : haxe_macro_ExprDef.EConst(c), pos : p});
+						return haxe_macro_TypeParam.TPExpr({ expr : haxe_macro_ExprDef.EConst(_g11.c), pos : _g3.pos});
 					} else {
 						try {
-							var e = this.expr();
-							return haxe_macro_TypeParam.TPExpr(e);
-						} catch( _3 ) {
-							var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-							if(((_4) instanceof hxparse_NoMatch)) {
-								var _5 = _4;
+							return haxe_macro_TypeParam.TPExpr(this.expr());
+						} catch( _1 ) {
+							if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							} else {
-								throw _3;
+								throw _1;
 							}
 						}
 					}
@@ -4365,19 +3907,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseComplexTypeNext: function(t) {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		switch(_g1._hx_index) {
 		case 5:
 			if(_g1.op._hx_index == 11) {
-				var pa = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var t2 = this.parseComplexType();
 				if(t2._hx_index == 7) {
-					var tl = t2.tl;
-					return haxe_macro_ComplexType.TIntersection(haxeparser_HaxeParser.aunshift(tl,t));
+					return haxe_macro_ComplexType.TIntersection(haxeparser_HaxeParser.aunshift(t2.tl,t));
 				} else {
 					return haxe_macro_ComplexType.TIntersection([t,t2]);
 				}
@@ -4390,9 +3928,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			this.token = this.token.next;
 			var t21 = this.parseComplexType();
 			if(t21._hx_index == 1) {
-				var r = t21.ret;
-				var args = t21.args;
-				return haxe_macro_ComplexType.TFunction(haxeparser_HaxeParser.aunshift(args,t),r);
+				return haxe_macro_ComplexType.TFunction(haxeparser_HaxeParser.aunshift(t21.args,t),t21.ret);
 			} else {
 				return haxe_macro_ComplexType.TFunction([t],t21);
 			}
@@ -4411,8 +3947,6 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					t1 = t;
 				} else if(t._hx_index == 0) {
 					var _g = t.p;
-					var _g4 = _g.sub;
-					var _g3 = _g.params;
 					t1 = _g.name == "Null" ? _g.pack.length == 0 ? t : haxe_macro_ComplexType.TPath({ pack : [], name : "Null", sub : null, params : [haxe_macro_TypeParam.TPType(t)]}) : haxe_macro_ComplexType.TPath({ pack : [], name : "Null", sub : null, params : [haxe_macro_TypeParam.TPType(t)]});
 				} else {
 					t1 = haxe_macro_ComplexType.TPath({ pack : [], name : "Null", sub : null, params : [haxe_macro_TypeParam.TPType(t)]});
@@ -4423,23 +3957,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			var _g2 = _g1.pos;
 			switch(_g1.tok._hx_index) {
 			case 13:
-				var p21 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g5 = this.peek(0);
-				var _g21 = _g5.pos;
-				if(_g5.tok._hx_index == 17) {
+				if(this.peek(0).tok._hx_index == 17) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					return next(p21,[]);
+					return next(_g2,[]);
 				} else {
 					try {
-						var l = this.parseTypeAnonymous(false);
-						return next(p21,l);
+						return next(_g2,this.parseTypeAnonymous(false));
 					} catch( _ ) {
-						var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-						if(((_1) instanceof hxparse_NoMatch)) {
-							var _2 = _1;
+						if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						} else {
 							throw _;
@@ -4448,20 +3976,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				}
 				break;
 			case 17:
-				var p22 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return next(p22,[]);
+				return next(_g2,[]);
 			default:
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
-		} catch( _3 ) {
-			var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-			if(((_4) instanceof hxparse_NoMatch)) {
-				var _5 = _4;
-				var _g6 = this.peek(0);
-				var _g22 = _g6.pos;
-				if(_g6.tok._hx_index == 20) {
+		} catch( _1 ) {
+			if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
+				if(this.peek(0).tok._hx_index == 20) {
 					if(!opt) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
@@ -4473,29 +3996,25 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 				}
 			} else {
-				throw _3;
+				throw _1;
 			}
 		}
 	}
 	,parseFunctionField: function(doc,meta,accessList) {
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		var _g1 = _g.tok;
 		if(_g1._hx_index == 0) {
 			if(_g1.k._hx_index == 0) {
-				var p1 = _g.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var name = this.parseFunName();
 				var pl = this.parseConstraintParams();
-				var _g2 = this.peek(0);
-				var _g21 = _g2.pos;
-				if(_g2.tok._hx_index == 18) {
+				if(this.peek(0).tok._hx_index == 18) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var al = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-					var _g3 = this.peek(0);
-					var _g22 = _g3.pos;
-					if(_g3.tok._hx_index == 19) {
+					if(this.peek(0).tok._hx_index == 19) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var t = this.parseTypeOpt();
@@ -4505,15 +4024,12 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 							this.semicolon();
 							e = { expr : e1, pos : e1.pos};
 						} catch( _ ) {
-							var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-							if(((_1) instanceof hxparse_NoMatch)) {
-								var _2 = _1;
-								var _g4 = this.peek(0);
-								if(_g4.tok._hx_index == 9) {
-									var p = _g4.pos;
+							if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+								var _g3 = this.peek(0);
+								if(_g3.tok._hx_index == 9) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									e = { expr : null, pos : p};
+									e = { expr : null, pos : _g3.pos};
 								} else {
 									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 								}
@@ -4521,8 +4037,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 								throw _;
 							}
 						}
-						var f = { params : pl, args : al, ret : t, expr : e.expr};
-						return { name : name, pos : haxeparser_HaxeParser.punion(p1,e.pos), kind : haxe_macro_FieldType.FFun(f)};
+						return { name : name, pos : haxeparser_HaxeParser.punion(_g2,e.pos), kind : haxe_macro_FieldType.FFun({ params : pl, args : al, ret : t, expr : e.expr})};
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
@@ -4545,18 +4060,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			if(_g1.op._hx_index == 4) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var e = this.toplevelExpr();
-				var p2 = this.semicolon();
-				return { expr : e, pos : p2};
+				return { expr : this.toplevelExpr(), pos : this.semicolon()};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 			break;
 		case 9:
-			var p21 = _g2;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			return { expr : null, pos : p21};
+			return { expr : null, pos : _g2};
 		default:
 			throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 		}
@@ -4573,30 +4085,23 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(_g1._hx_index == 0) {
 			switch(_g1.k._hx_index) {
 			case 2:
-				var p1 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var name = this.questionableDollarIdent();
-				var _g3 = this.peek(0);
-				var _g21 = _g3.pos;
-				if(_g3.tok._hx_index == 18) {
+				if(this.peek(0).tok._hx_index == 18) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var i1 = this.propertyIdent();
-					var _g4 = this.peek(0);
-					var _g22 = _g4.pos;
-					if(_g4.tok._hx_index == 13) {
+					if(this.peek(0).tok._hx_index == 13) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var i2 = this.propertyIdent();
-						var _g5 = this.peek(0);
-						var _g23 = _g5.pos;
-						if(_g5.tok._hx_index == 19) {
+						if(this.peek(0).tok._hx_index == 19) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var t = this.parseTypeOpt();
 							var e = this.parseVarFieldAssignment();
-							data = { name : name.name, pos : haxeparser_HaxeParser.punion(p1,e.pos), kind : haxe_macro_FieldType.FProp(i1,i2,t,e.expr)};
+							data = { name : name.name, pos : haxeparser_HaxeParser.punion(_g2,e.pos), kind : haxe_macro_FieldType.FProp(i1,i2,t,e.expr)};
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
@@ -4606,11 +4111,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				} else {
 					var t1 = this.parseTypeOpt();
 					var e1 = this.parseVarFieldAssignment();
-					data = { name : name.name, pos : haxeparser_HaxeParser.punion(p1,e1.pos), kind : haxe_macro_FieldType.FVar(t1,e1.expr)};
+					data = { name : name.name, pos : haxeparser_HaxeParser.punion(_g2,e1.pos), kind : haxe_macro_FieldType.FVar(t1,e1.expr)};
 				}
 				break;
 			case 41:
-				var p11 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				try {
@@ -4618,15 +4122,12 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					var t2 = this.parseTypeOpt();
 					var e2 = this.parseVarFieldAssignment();
 					al.push(haxe_macro_Access.AFinal);
-					data = { name : name1.name, pos : haxeparser_HaxeParser.punion(p11,e2.pos), kind : haxe_macro_FieldType.FVar(t2,e2.expr)};
+					data = { name : name1.name, pos : haxeparser_HaxeParser.punion(_g2,e2.pos), kind : haxe_macro_FieldType.FVar(t2,e2.expr)};
 				} catch( _ ) {
-					var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-					if(((_1) instanceof hxparse_NoMatch)) {
-						var _2 = _1;
+					if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 						var al2 = this.parseCfRights(true,al);
-						var f = this.parseFunctionField(doc,meta,haxeparser_HaxeParser.apush(al2,haxe_macro_Access.AFinal));
 						al = al2;
-						data = f;
+						data = this.parseFunctionField(doc,meta,haxeparser_HaxeParser.apush(al2,haxe_macro_Access.AFinal));
 					} else {
 						throw _;
 					}
@@ -4634,94 +4135,76 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				break;
 			default:
 				try {
-					var f1 = this.parseFunctionField(doc,meta,al);
-					data = f1;
-				} catch( _3 ) {
-					var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-					if(((_4) instanceof hxparse_NoMatch)) {
-						var _5 = _4;
+					data = this.parseFunctionField(doc,meta,al);
+				} catch( _1 ) {
+					if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
 						if(al.length == 0) {
 							throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
 					} else {
-						throw _3;
+						throw _1;
 					}
 				}
 			}
 		} else {
 			try {
-				var f2 = this.parseFunctionField(doc,meta,al);
-				data = f2;
-			} catch( _6 ) {
-				var _7 = ((_6) instanceof js__$Boot_HaxeError) ? _6.val : _6;
-				if(((_7) instanceof hxparse_NoMatch)) {
-					var _8 = _7;
+				data = this.parseFunctionField(doc,meta,al);
+			} catch( _2 ) {
+				if(((((_2) instanceof js__$Boot_HaxeError) ? _2.val : _2) instanceof hxparse_NoMatch)) {
 					if(al.length == 0) {
 						throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
 				} else {
-					throw _6;
+					throw _2;
 				}
 			}
 		}
 		return { name : data.name, doc : doc, meta : meta, access : al, pos : data.pos, kind : data.kind};
 	}
 	,parseCfRights: function(allowStatic,l) {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 0) {
 			if(_g1.k._hx_index == 17) {
 				if(allowStatic) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l1 = this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AStatic));
-					return l1;
+					return this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AStatic));
 				} else {
-					var _g3 = this.peek(0);
-					var _g21 = _g3.pos;
-					var _g11 = _g3.tok;
+					var _g11 = this.peek(0).tok;
 					if(_g11._hx_index == 0) {
 						switch(_g11.k._hx_index) {
 						case 18:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l2 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
-							return l2;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
 						case 19:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l3 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
-							return l3;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
 						case 25:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l4 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
-							return l4;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
 						case 30:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l5 = this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
-							return l5;
+							return this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
 						case 32:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l6 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
-							return l6;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
 						case 34:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l7 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
-							return l7;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
 						case 40:
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var l8 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
-							return l8;
+							return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
 						default:
 							return l;
 						}
@@ -4730,46 +4213,37 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					}
 				}
 			} else {
-				var _g4 = this.peek(0);
-				var _g22 = _g4.pos;
-				var _g12 = _g4.tok;
+				var _g12 = this.peek(0).tok;
 				if(_g12._hx_index == 0) {
 					switch(_g12.k._hx_index) {
 					case 18:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l9 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
-						return l9;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
 					case 19:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l10 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
-						return l10;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
 					case 25:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l11 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
-						return l11;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
 					case 30:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l12 = this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
-						return l12;
+						return this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
 					case 32:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l13 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
-						return l13;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
 					case 34:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l14 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
-						return l14;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
 					case 40:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var l15 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
-						return l15;
+						return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
 					default:
 						return l;
 					}
@@ -4778,46 +4252,37 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				}
 			}
 		} else {
-			var _g5 = this.peek(0);
-			var _g23 = _g5.pos;
-			var _g13 = _g5.tok;
+			var _g13 = this.peek(0).tok;
 			if(_g13._hx_index == 0) {
 				switch(_g13.k._hx_index) {
 				case 18:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l16 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
-					return l16;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APublic));
 				case 19:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l17 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
-					return l17;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.APrivate));
 				case 25:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l18 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
-					return l18;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AExtern));
 				case 30:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l19 = this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
-					return l19;
+					return this.parseCfRights(false,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AOverride));
 				case 32:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l20 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
-					return l20;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.ADynamic));
 				case 34:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l21 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
-					return l21;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AInline));
 				case 40:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var l22 = this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
-					return l22;
+					return this.parseCfRights(allowStatic,haxeparser_HaxeParser.apush(l,haxe_macro_Access.AMacro));
 				default:
 					return l;
 				}
@@ -4827,9 +4292,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseFunName: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		switch(_g1._hx_index) {
 		case 0:
 			if(_g1.k._hx_index == 22) {
@@ -4843,10 +4306,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 1:
 			var _g3 = _g1.c;
 			if(_g3._hx_index == 3) {
-				var name = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return name;
+				return _g3.s;
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
@@ -4857,9 +4319,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,parseFunParam: function() {
 		var meta = this.parseMeta();
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 20) {
+		if(this.peek(0).tok._hx_index == 20) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var id = this.ident();
@@ -4874,15 +4334,12 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseFunParamValue: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 5) {
 			if(_g1.op._hx_index == 4) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var e = this.toplevelExpr();
-				return e;
+				return this.toplevelExpr();
 			} else {
 				return null;
 			}
@@ -4891,17 +4348,13 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseConstraintParams: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 5) {
 			if(_g1.op._hx_index == 9) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var l = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseConstraintParam));
-				var _g3 = this.peek(0);
-				var _g21 = _g3.pos;
-				var _g11 = _g3.tok;
+				var _g11 = this.peek(0).tok;
 				if(_g11._hx_index == 5) {
 					if(_g11.op._hx_index == 7) {
 						this.last = this.token.elt;
@@ -4925,20 +4378,14 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var name = this.typeName();
 		var params = [];
 		var ctl;
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 11) {
+		if(this.peek(0).tok._hx_index == 11) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var _g1 = this.peek(0);
-			var _g21 = _g1.pos;
-			if(_g1.tok._hx_index == 18) {
+			if(this.peek(0).tok._hx_index == 18) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var l = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseComplexType));
-				var _g3 = this.peek(0);
-				var _g22 = _g3.pos;
-				if(_g3.tok._hx_index == 19) {
+				if(this.peek(0).tok._hx_index == 19) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					ctl = l;
@@ -4947,12 +4394,9 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				}
 			} else {
 				try {
-					var t = this.parseComplexType();
-					ctl = [t];
+					ctl = [this.parseComplexType()];
 				} catch( _ ) {
-					var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-					if(((_1) instanceof hxparse_NoMatch)) {
-						var _2 = _1;
+					if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					} else {
 						throw _;
@@ -4965,21 +4409,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		return { name : name, params : params, constraints : ctl, meta : meta};
 	}
 	,parseClassHerit: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 0) {
 			switch(_g1.k._hx_index) {
 			case 11:
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var t = this.parseTypePath();
-				return haxeparser_ClassFlag.HExtends(t);
+				return haxeparser_ClassFlag.HExtends(this.parseTypePath());
 			case 12:
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var t1 = this.parseTypePath();
-				return haxeparser_ClassFlag.HImplements(t1);
+				return haxeparser_ClassFlag.HImplements(this.parseTypePath());
 			default:
 				throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 			}
@@ -4995,31 +4435,24 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			var _g3 = _g1.c;
 			switch(_g3._hx_index) {
 			case 2:
-				var _g6 = _g3.kind;
-				var p = _g2;
-				var name = _g3.s;
+				var _g5 = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.block2(haxeparser_HaxeParser.quoteIdent(name),haxe_macro_QuoteStatus.Quoted,haxe_macro_Constant.CString(name),p);
+				return this.block2(haxeparser_HaxeParser.quoteIdent(_g5),haxe_macro_QuoteStatus.Quoted,haxe_macro_Constant.CString(_g5),_g2);
 			case 3:
-				var p1 = _g2;
-				var name1 = _g3.s;
+				var _g4 = _g3.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.block2(name1,haxe_macro_QuoteStatus.Unquoted,haxe_macro_Constant.CIdent(name1),p1);
+				return this.block2(_g4,haxe_macro_QuoteStatus.Unquoted,haxe_macro_Constant.CIdent(_g4),_g2);
 			default:
-				var b = this.block([]);
-				return haxe_macro_ExprDef.EBlock(b);
+				return haxe_macro_ExprDef.EBlock(this.block([]));
 			}
 		} else {
-			var b1 = this.block([]);
-			return haxe_macro_ExprDef.EBlock(b1);
+			return haxe_macro_ExprDef.EBlock(this.block([]));
 		}
 	}
 	,block2: function(name,quotes,ident,p) {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 11) {
+		if(this.peek(0).tok._hx_index == 11) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var e = this.expr();
@@ -5028,22 +4461,18 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			return haxe_macro_ExprDef.EObjectDecl(l);
 		} else {
 			var e1 = this.exprNext({ expr : haxe_macro_ExprDef.EConst(ident), pos : p});
-			var _ = this.semicolon();
-			var b = this.block([e1]);
-			return haxe_macro_ExprDef.EBlock(b);
+			this.semicolon();
+			return haxe_macro_ExprDef.EBlock(this.block([e1]));
 		}
 	}
 	,block: function(acc) {
 		try {
-			var e = this.parseBlockElt();
-			return this.block(haxeparser_HaxeParser.apush(acc,e));
-		} catch( e1 ) {
-			var e2 = ((e1) instanceof js__$Boot_HaxeError) ? e1.val : e1;
-			if(((e2) instanceof hxparse_NoMatch)) {
-				var e3 = e2;
+			return this.block(haxeparser_HaxeParser.apush(acc,this.parseBlockElt()));
+		} catch( e ) {
+			if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof hxparse_NoMatch)) {
 				return acc;
 			} else {
-				throw e1;
+				throw e;
 			}
 		}
 	}
@@ -5055,37 +4484,29 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(_g1._hx_index == 0) {
 			switch(_g1.k._hx_index) {
 			case 2:
-				var p1 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var vl = this.psep(haxeparser_TokenDef.Comma,function() {
+				return { expr : haxe_macro_ExprDef.EVars(this.psep(haxeparser_TokenDef.Comma,function() {
 					return _gthis.parseVarDecl(false);
-				});
-				var p2 = this.semicolon();
-				return { expr : haxe_macro_ExprDef.EVars(vl), pos : haxeparser_HaxeParser.punion(p1,p2)};
+				})), pos : haxeparser_HaxeParser.punion(_g2,this.semicolon())};
 			case 34:
-				var p11 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g3 = this.peek(0);
-				var _g21 = _g3.pos;
-				var _g11 = _g3.tok;
+				var _g11 = this.peek(0).tok;
 				if(_g11._hx_index == 0) {
 					if(_g11.k._hx_index == 0) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e = this.parseFunction(p11,true);
+						var e = this.parseFunction(_g2,true);
 						this.semicolon();
 						return e;
 					} else {
 						try {
 							var e1 = this.secureExpr();
 							this.semicolon();
-							return haxeparser_HaxeParser.makeMeta(":inline",[],e1,p11);
+							return haxeparser_HaxeParser.makeMeta(":inline",[],e1,_g2);
 						} catch( _ ) {
-							var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-							if(((_1) instanceof hxparse_NoMatch)) {
-								var _2 = _1;
+							if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							} else {
 								throw _;
@@ -5096,27 +4517,22 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					try {
 						var e2 = this.secureExpr();
 						this.semicolon();
-						return haxeparser_HaxeParser.makeMeta(":inline",[],e2,p11);
-					} catch( _3 ) {
-						var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-						if(((_4) instanceof hxparse_NoMatch)) {
-							var _5 = _4;
+						return haxeparser_HaxeParser.makeMeta(":inline",[],e2,_g2);
+					} catch( _1 ) {
+						if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						} else {
-							throw _3;
+							throw _1;
 						}
 					}
 				}
 				break;
 			case 41:
-				var p12 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var vl1 = this.psep(haxeparser_TokenDef.Comma,function() {
+				return { expr : haxe_macro_ExprDef.EVars(this.psep(haxeparser_TokenDef.Comma,function() {
 					return _gthis.parseVarDecl(true);
-				});
-				var p21 = this.semicolon();
-				return { expr : haxe_macro_ExprDef.EVars(vl1), pos : haxeparser_HaxeParser.punion(p12,p21)};
+				})), pos : haxeparser_HaxeParser.punion(_g2,this.semicolon())};
 			default:
 				var e3 = this.expr();
 				this.semicolon();
@@ -5130,61 +4546,47 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,parseObjDecl: function() {
 		var acc = [];
-		while(true) {
-			var _g = this.peek(0);
-			var _g2 = _g.pos;
-			if(_g.tok._hx_index == 13) {
-				this.last = this.token.elt;
-				this.token = this.token.next;
-				try {
-					var id = this.ident();
-					var _g1 = this.peek(0);
-					var _g21 = _g1.pos;
-					if(_g1.tok._hx_index == 11) {
-						this.last = this.token.elt;
-						this.token = this.token.next;
-						var e = this.expr();
-						acc.push({ field : id.name, expr : e, quotes : haxe_macro_QuoteStatus.Unquoted});
-					} else {
-						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
-					}
-				} catch( _ ) {
-					var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-					if(((_1) instanceof hxparse_NoMatch)) {
-						var _2 = _1;
-						var _g3 = this.peek(0);
-						var _g22 = _g3.pos;
-						var _g11 = _g3.tok;
-						if(_g11._hx_index == 1) {
-							var _g31 = _g11.c;
-							if(_g31._hx_index == 2) {
-								var _g5 = _g31.kind;
-								var name = _g31.s;
+		while(true) if(this.peek(0).tok._hx_index == 13) {
+			this.last = this.token.elt;
+			this.token = this.token.next;
+			try {
+				var id = this.ident();
+				if(this.peek(0).tok._hx_index == 11) {
+					this.last = this.token.elt;
+					this.token = this.token.next;
+					var e = this.expr();
+					acc.push({ field : id.name, expr : e, quotes : haxe_macro_QuoteStatus.Unquoted});
+				} else {
+					throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
+				}
+			} catch( _ ) {
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+					var _g1 = this.peek(0).tok;
+					if(_g1._hx_index == 1) {
+						var _g3 = _g1.c;
+						if(_g3._hx_index == 2) {
+							this.last = this.token.elt;
+							this.token = this.token.next;
+							if(this.peek(0).tok._hx_index == 11) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var _g4 = this.peek(0);
-								var _g23 = _g4.pos;
-								if(_g4.tok._hx_index == 11) {
-									this.last = this.token.elt;
-									this.token = this.token.next;
-									var e1 = this.expr();
-									acc.push({ field : haxeparser_HaxeParser.quoteIdent(name), expr : e1, quotes : haxe_macro_QuoteStatus.Quoted});
-								} else {
-									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
-								}
+								var e1 = this.expr();
+								acc.push({ field : haxeparser_HaxeParser.quoteIdent(_g3.s), expr : e1, quotes : haxe_macro_QuoteStatus.Quoted});
 							} else {
-								break;
+								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
 						} else {
 							break;
 						}
 					} else {
-						throw _;
+						break;
 					}
+				} else {
+					throw _;
 				}
-			} else {
-				break;
 			}
+		} else {
+			break;
 		}
 		return acc;
 	}
@@ -5193,20 +4595,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		var br = false;
 		while(true) {
 			try {
-				var e = this.expr();
-				acc.push(e);
-				var _g = this.peek(0);
-				var _g2 = _g.pos;
-				if(_g.tok._hx_index == 13) {
+				acc.push(this.expr());
+				if(this.peek(0).tok._hx_index == 13) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 				} else {
 					br = true;
 				}
 			} catch( _ ) {
-				var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-				if(((_1) instanceof hxparse_NoMatch)) {
-					var _2 = _1;
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 					br = true;
 				} else {
 					throw _;
@@ -5221,9 +4618,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseVarDecl: function(isFinal) {
 		var id = this.dollarIdent();
 		var t = this.parseTypeOpt();
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 5) {
 			if(_g1.op._hx_index == 4) {
 				this.last = this.token.elt;
@@ -5244,8 +4639,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}, toType : $bind(reificator,reificator.toCType), toTypeDef : $bind(reificator,reificator.toTypeDef)};
 	}
 	,reifyExpr: function(e) {
-		var toExpr = this.reify(this.inMacro).toExpr;
-		var e1 = toExpr(e);
+		var e1 = this.reify(this.inMacro).toExpr(e);
 		return { expr : haxe_macro_ExprDef.ECheckType(e1,haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : null, params : []})), pos : e1.pos};
 	}
 	,parseMacroExpr: function(p) {
@@ -5257,32 +4651,24 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 0:
 			switch(_g1.k._hx_index) {
 			case 2:
-				var p1 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var vl = this.psep(haxeparser_TokenDef.Comma,function() {
+				return this.reifyExpr({ expr : haxe_macro_ExprDef.EVars(this.psep(haxeparser_TokenDef.Comma,function() {
 					return _gthis.parseVarDecl(false);
-				});
-				return this.reifyExpr({ expr : haxe_macro_ExprDef.EVars(vl), pos : p1});
+				})), pos : _g2});
 			case 41:
-				var p11 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var vl1 = this.psep(haxeparser_TokenDef.Comma,function() {
+				return this.reifyExpr({ expr : haxe_macro_ExprDef.EVars(this.psep(haxeparser_TokenDef.Comma,function() {
 					return _gthis.parseVarDecl(true);
-				});
-				return this.reifyExpr({ expr : haxe_macro_ExprDef.EVars(vl1), pos : p11});
+				})), pos : _g2});
 			default:
 				try {
 					var d = this.parseClass([],[],false);
-					var toType = this.reify(this.inMacro).toTypeDef;
-					return { expr : haxe_macro_ExprDef.ECheckType(toType(d),haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "TypeDefinition", params : []})), pos : p};
+					return { expr : haxe_macro_ExprDef.ECheckType(this.reify(this.inMacro).toTypeDef(d),haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "TypeDefinition", params : []})), pos : p};
 				} catch( _ ) {
-					var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-					if(((_1) instanceof hxparse_NoMatch)) {
-						var _2 = _1;
-						var e = this.secureExpr();
-						return this.reifyExpr(e);
+					if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+						return this.reifyExpr(this.secureExpr());
 					} else {
 						throw _;
 					}
@@ -5293,22 +4679,16 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var t = this.parseComplexType();
-			var toType1 = this.reify(this.inMacro).toType;
-			var t1 = toType1(t,p);
-			return { expr : haxe_macro_ExprDef.ECheckType(t1,haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "ComplexType", params : []})), pos : p};
+			return { expr : haxe_macro_ExprDef.ECheckType(this.reify(this.inMacro).toType(t,p),haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "ComplexType", params : []})), pos : p};
 		default:
 			try {
 				var d1 = this.parseClass([],[],false);
-				var toType2 = this.reify(this.inMacro).toTypeDef;
-				return { expr : haxe_macro_ExprDef.ECheckType(toType2(d1),haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "TypeDefinition", params : []})), pos : p};
-			} catch( _3 ) {
-				var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-				if(((_4) instanceof hxparse_NoMatch)) {
-					var _5 = _4;
-					var e1 = this.secureExpr();
-					return this.reifyExpr(e1);
+				return { expr : haxe_macro_ExprDef.ECheckType(this.reify(this.inMacro).toTypeDef(d1),haxe_macro_ComplexType.TPath({ pack : ["haxe","macro"], name : "Expr", sub : "TypeDefinition", params : []})), pos : p};
+			} catch( _1 ) {
+				if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
+					return this.reifyExpr(this.secureExpr());
 				} else {
-					throw _3;
+					throw _1;
 				}
 			}
 		}
@@ -5316,28 +4696,22 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseFunction: function(p1,inl) {
 		var name = this.parseOptional($bind(this,this.dollarIdent));
 		var pl = this.parseConstraintParams();
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 18) {
+		if(this.peek(0).tok._hx_index == 18) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
 			var al = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-			var _g1 = this.peek(0);
-			var _g21 = _g1.pos;
-			if(_g1.tok._hx_index == 19) {
+			if(this.peek(0).tok._hx_index == 19) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var t = this.parseOptional($bind(this,this.parseTypeHint));
-				var make = function(eBody) {
-					var f = { params : pl, ret : t, args : al, expr : eBody};
-					var e = { expr : haxe_macro_ExprDef.EFunction(name == null ? haxe_macro_FunctionKind.FAnonymous : haxe_macro_FunctionKind.FNamed(name.name),f), pos : haxeparser_HaxeParser.punion(p1,eBody.pos)};
+				return (function(eBody) {
+					var e = { expr : haxe_macro_ExprDef.EFunction(name == null ? haxe_macro_FunctionKind.FAnonymous : haxe_macro_FunctionKind.FNamed(name.name),{ params : pl, ret : t, args : al, expr : eBody}), pos : haxeparser_HaxeParser.punion(p1,eBody.pos)};
 					if(inl) {
 						return haxeparser_HaxeParser.makeMeta(":inline",[],e,p1);
 					} else {
 						return e;
 					}
-				};
-				return make(this.secureExpr());
+				})(this.secureExpr());
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
@@ -5346,13 +4720,10 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,arrowExpr: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		if(_g.tok._hx_index == 12) {
+		if(this.peek(0).tok._hx_index == 12) {
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var e = this.expr();
-			return e;
+			return this.expr();
 		} else {
 			throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 		}
@@ -5366,22 +4737,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 0:
 			var _g7 = _g.c;
 			if(_g7._hx_index == 3) {
-				var n = _g7.s;
-				return { name : n, type : null};
+				return { name : _g7.s, type : null};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 			break;
 		case 27:
-			var _g1 = _g.e;
-			var _g4 = _g1.pos;
-			var _g3 = _g1.expr;
+			var _g3 = _g.e.expr;
 			if(_g3._hx_index == 0) {
 				var _g5 = _g3.c;
 				if(_g5._hx_index == 3) {
-					var t = _g.t;
-					var n1 = _g5.s;
-					return { name : n1, type : t};
+					return { name : _g5.s, type : _g.t};
 				} else {
 					throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 				}
@@ -5399,35 +4765,26 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 0:
 			var _g10 = _g.c;
 			if(_g10._hx_index == 3) {
-				var n = _g10.s;
-				return { name : n, opt : false, meta : [], type : null, value : null};
+				return { name : _g10.s, opt : false, meta : [], type : null, value : null};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 			break;
 		case 2:
-			var e2 = _g.e2;
-			var e1 = _g.e1;
-			var op = _g.op;
 			return null;
 		case 4:
 			var _g1 = _g.e;
-			var _g3 = _g1.pos;
 			var _g2 = _g1.expr;
 			if(_g2._hx_index == 2) {
 				if(_g2.op._hx_index == 4) {
-					var e21 = _g2.e2;
-					var e11 = _g2.e1;
-					var np = this.arrowIdentChecktype(e11);
-					return { name : np.name, opt : true, meta : [], type : np.type, value : e21};
+					var np = this.arrowIdentChecktype(_g2.e1);
+					return { name : np.name, opt : true, meta : [], type : np.type, value : _g2.e2};
 				} else {
-					var e3 = _g1;
-					var np1 = this.arrowIdentChecktype(e3);
+					var np1 = this.arrowIdentChecktype(_g1);
 					return { name : np1.name, opt : false, meta : [], type : np1.type, value : null};
 				}
 			} else {
-				var e4 = _g1;
-				var np2 = this.arrowIdentChecktype(e4);
+				var np2 = this.arrowIdentChecktype(_g1);
 				return { name : np2.name, opt : false, meta : [], type : np2.type, value : null};
 			}
 			break;
@@ -5441,9 +4798,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			var meta = this.parseMetaEntry();
 			return haxeparser_HaxeParser.makeMeta(meta.name,meta.params,this.secureExpr(),meta.pos);
 		} catch( _ ) {
-			var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-			if(((_1) instanceof hxparse_NoMatch)) {
-				var _2 = _1;
+			if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 				var _g = this.peek(0);
 				var _g2 = _g.pos;
 				var _g1 = _g.tok;
@@ -5451,52 +4806,37 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				case 0:
 					switch(_g1.k._hx_index) {
 					case 0:
-						var p1 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e = this.parseFunction(p1,false);
-						return e;
+						return this.parseFunction(_g2,false);
 					case 2:
-						var p11 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var v = this.parseVarDecl(false);
-						return { expr : haxe_macro_ExprDef.EVars([v]), pos : p11};
+						return { expr : haxe_macro_ExprDef.EVars([this.parseVarDecl(false)]), pos : _g2};
 					case 3:
-						var p = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g3 = this.peek(0);
-						var _g21 = _g3.pos;
-						if(_g3.tok._hx_index == 18) {
+						if(this.peek(0).tok._hx_index == 18) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var cond = this.expr();
-							var _g4 = this.peek(0);
-							var _g22 = _g4.pos;
-							if(_g4.tok._hx_index == 19) {
+							if(this.peek(0).tok._hx_index == 19) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
 								var e1 = this.expr();
 								var e2;
-								var _g5 = this.peek(0);
-								var _g23 = _g5.pos;
-								var _g11 = _g5.tok;
+								var _g11 = this.peek(0).tok;
 								if(_g11._hx_index == 0) {
 									if(_g11.k._hx_index == 4) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										var e21 = this.expr();
-										e2 = e21;
+										e2 = this.expr();
 									} else {
-										var _g6 = this.peek(1);
-										var _g12 = this.peek(0);
-										var _g31 = _g12.pos;
-										if(_g12.tok._hx_index == 9) {
-											var _g51 = _g6.pos;
-											var _g41 = _g6.tok;
-											if(_g41._hx_index == 0) {
-												if(_g41.k._hx_index == 4) {
+										var _g3 = this.peek(1);
+										if(this.peek(0).tok._hx_index == 9) {
+											var _g4 = _g3.tok;
+											if(_g4._hx_index == 0) {
+												if(_g4.k._hx_index == 4) {
 													this.last = this.token.elt;
 													this.token = this.token.next;
 													this.last = this.token.elt;
@@ -5513,14 +4853,11 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 										}
 									}
 								} else {
-									var _g7 = this.peek(1);
-									var _g13 = this.peek(0);
-									var _g32 = _g13.pos;
-									if(_g13.tok._hx_index == 9) {
-										var _g52 = _g7.pos;
-										var _g42 = _g7.tok;
-										if(_g42._hx_index == 0) {
-											if(_g42.k._hx_index == 4) {
+									var _g5 = this.peek(1);
+									if(this.peek(0).tok._hx_index == 9) {
+										var _g41 = _g5.tok;
+										if(_g41._hx_index == 0) {
+											if(_g41.k._hx_index == 4) {
 												this.last = this.token.elt;
 												this.token = this.token.next;
 												this.last = this.token.elt;
@@ -5536,7 +4873,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 										e2 = null;
 									}
 								}
-								return { expr : haxe_macro_ExprDef.EIf(cond,e1,e2), pos : haxeparser_HaxeParser.punion(p,e2 == null ? e1.pos : e2.pos)};
+								return { expr : haxe_macro_ExprDef.EIf(cond,e1,e2), pos : haxeparser_HaxeParser.punion(_g2,e2 == null ? e1.pos : e2.pos)};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
@@ -5545,22 +4882,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 5:
-						var p12 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g8 = this.peek(0);
-						var _g24 = _g8.pos;
-						if(_g8.tok._hx_index == 18) {
+						if(this.peek(0).tok._hx_index == 18) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var cond1 = this.expr();
-							var _g9 = this.peek(0);
-							var _g25 = _g9.pos;
-							if(_g9.tok._hx_index == 19) {
+							if(this.peek(0).tok._hx_index == 19) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var e3 = this.secureExpr();
-								return { expr : haxe_macro_ExprDef.EWhile(cond1,e3,true), pos : haxeparser_HaxeParser.punion(p12,e3.pos)};
+								var e = this.secureExpr();
+								return { expr : haxe_macro_ExprDef.EWhile(cond1,e,true), pos : haxeparser_HaxeParser.punion(_g2,e.pos)};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
@@ -5569,29 +4901,22 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 6:
-						var p13 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e4 = this.expr();
-						var _g10 = this.peek(0);
-						var _g26 = _g10.pos;
-						var _g14 = _g10.tok;
-						if(_g14._hx_index == 0) {
-							if(_g14.k._hx_index == 5) {
+						var e3 = this.expr();
+						var _g12 = this.peek(0).tok;
+						if(_g12._hx_index == 0) {
+							if(_g12.k._hx_index == 5) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var _g15 = this.peek(0);
-								var _g27 = _g15.pos;
-								if(_g15.tok._hx_index == 18) {
+								if(this.peek(0).tok._hx_index == 18) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
 									var cond2 = this.expr();
-									var _g16 = this.peek(0);
-									var _g28 = _g16.pos;
-									if(_g16.tok._hx_index == 19) {
+									if(this.peek(0).tok._hx_index == 19) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										return { expr : haxe_macro_ExprDef.EWhile(cond2,e4,false), pos : haxeparser_HaxeParser.punion(p13,e4.pos)};
+										return { expr : haxe_macro_ExprDef.EWhile(cond2,e3,false), pos : haxeparser_HaxeParser.punion(_g2,e3.pos)};
 									} else {
 										throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 									}
@@ -5606,22 +4931,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 7:
-						var p2 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g17 = this.peek(0);
-						var _g29 = _g17.pos;
-						if(_g17.tok._hx_index == 18) {
+						if(this.peek(0).tok._hx_index == 18) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var it = this.expr();
-							var _g18 = this.peek(0);
-							var _g210 = _g18.pos;
-							if(_g18.tok._hx_index == 19) {
+							if(this.peek(0).tok._hx_index == 19) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var e5 = this.secureExpr();
-								return { expr : haxe_macro_ExprDef.EFor(it,e5), pos : haxeparser_HaxeParser.punion(p2,e5.pos)};
+								var e4 = this.secureExpr();
+								return { expr : haxe_macro_ExprDef.EFor(it,e4), pos : haxeparser_HaxeParser.punion(_g2,e4.pos)};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
@@ -5630,38 +4950,31 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 8:
-						var p3 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return { expr : haxe_macro_ExprDef.EBreak, pos : p3};
+						return { expr : haxe_macro_ExprDef.EBreak, pos : _g2};
 					case 9:
-						var p4 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return { expr : haxe_macro_ExprDef.EContinue, pos : p4};
+						return { expr : haxe_macro_ExprDef.EContinue, pos : _g2};
 					case 10:
-						var p5 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e6 = this.parseOptional($bind(this,this.expr));
-						return { expr : haxe_macro_ExprDef.EReturn(e6), pos : e6 == null ? p5 : haxeparser_HaxeParser.punion(p5,e6.pos)};
+						var e5 = this.parseOptional($bind(this,this.expr));
+						return { expr : haxe_macro_ExprDef.EReturn(e5), pos : e5 == null ? _g2 : haxeparser_HaxeParser.punion(_g2,e5.pos)};
 					case 14:
-						var p14 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e7 = this.expr();
-						var _g19 = this.peek(0);
-						var _g211 = _g19.pos;
-						if(_g19.tok._hx_index == 16) {
+						var e6 = this.expr();
+						if(this.peek(0).tok._hx_index == 16) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var cases = this.parseSwitchCases();
-							var _g20 = this.peek(0);
-							if(_g20.tok._hx_index == 17) {
-								var p21 = _g20.pos;
+							var _g6 = this.peek(0);
+							if(_g6.tok._hx_index == 17) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								return { expr : haxe_macro_ExprDef.ESwitch(e7,cases.cases,cases.def), pos : haxeparser_HaxeParser.punion(p14,p21)};
+								return { expr : haxe_macro_ExprDef.ESwitch(e6,cases.cases,cases.def), pos : haxeparser_HaxeParser.punion(_g2,_g6.pos)};
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
@@ -5670,40 +4983,31 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 20:
-						var p15 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e8 = this.expr();
-						var cl = this.parseRepeat($bind(this,this.parseCatch));
-						return { expr : haxe_macro_ExprDef.ETry(e8,cl), pos : p15};
+						return { expr : haxe_macro_ExprDef.ETry(this.expr(),this.parseRepeat($bind(this,this.parseCatch))), pos : _g2};
 					case 22:
-						var p16 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var t = this.parseTypePath();
-						var _g30 = this.peek(0);
-						var _g212 = _g30.pos;
-						if(_g30.tok._hx_index == 18) {
+						if(this.peek(0).tok._hx_index == 18) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							try {
 								var al = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.expr));
-								var _g33 = this.peek(0);
-								if(_g33.tok._hx_index == 19) {
-									var p22 = _g33.pos;
+								var _g7 = this.peek(0);
+								if(_g7.tok._hx_index == 19) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									return this.exprNext({ expr : haxe_macro_ExprDef.ENew(t,al), pos : haxeparser_HaxeParser.punion(p16,p22)});
+									return this.exprNext({ expr : haxe_macro_ExprDef.ENew(t,al), pos : haxeparser_HaxeParser.punion(_g2,_g7.pos)});
 								} else {
 									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 								}
-							} catch( _3 ) {
-								var _4 = ((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3;
-								if(((_4) instanceof hxparse_NoMatch)) {
-									var _5 = _4;
+							} catch( _1 ) {
+								if(((((_1) instanceof js__$Boot_HaxeError) ? _1.val : _1) instanceof hxparse_NoMatch)) {
 									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 								} else {
-									throw _3;
+									throw _1;
 								}
 							}
 						} else {
@@ -5711,84 +5015,70 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 						}
 						break;
 					case 23:
-						var p6 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("this")), pos : p6});
+						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("this")), pos : _g2});
 					case 24:
-						var p7 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e9 = this.expr();
-						return { expr : haxe_macro_ExprDef.EThrow(e9), pos : p7};
+						return { expr : haxe_macro_ExprDef.EThrow(this.expr()), pos : _g2};
 					case 28:
-						var p17 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e10 = this.expr();
-						return { expr : haxe_macro_ExprDef.EUntyped(e10), pos : haxeparser_HaxeParser.punion(p17,e10.pos)};
+						var e7 = this.expr();
+						return { expr : haxe_macro_ExprDef.EUntyped(e7), pos : haxeparser_HaxeParser.punion(_g2,e7.pos)};
 					case 29:
-						var p18 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g34 = this.peek(0);
-						if(_g34.tok._hx_index == 18) {
-							var pp = _g34.pos;
+						var _g8 = this.peek(0);
+						var _g21 = _g8.pos;
+						if(_g8.tok._hx_index == 18) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var e11 = this.expr();
-							var _g35 = this.peek(0);
-							var _g213 = _g35.pos;
-							if(_g35.tok._hx_index == 13) {
+							var e8 = this.expr();
+							if(this.peek(0).tok._hx_index == 13) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
 								var t1 = this.parseComplexType();
-								var _g36 = this.peek(0);
-								if(_g36.tok._hx_index == 19) {
-									var p23 = _g36.pos;
+								var _g9 = this.peek(0);
+								if(_g9.tok._hx_index == 19) {
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e11,t1), pos : haxeparser_HaxeParser.punion(p18,p23)});
+									return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e8,t1), pos : haxeparser_HaxeParser.punion(_g2,_g9.pos)});
 								} else {
 									throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 								}
 							} else {
 								try {
 									var t2 = this.parseTypeHint();
-									var _g37 = this.peek(0);
-									if(_g37.tok._hx_index == 19) {
-										var p24 = _g37.pos;
+									var _g10 = this.peek(0);
+									if(_g10.tok._hx_index == 19) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										var pu = haxeparser_HaxeParser.punion(p18,p24);
-										var ep = { expr : haxe_macro_ExprDef.EParenthesis({ expr : haxe_macro_ExprDef.ECheckType(e11,t2), pos : pu}), pos : pu};
-										return this.exprNext({ expr : haxe_macro_ExprDef.ECast(ep,null), pos : haxeparser_HaxeParser.punion(p18,pu)});
+										var pu = haxeparser_HaxeParser.punion(_g2,_g10.pos);
+										return this.exprNext({ expr : haxe_macro_ExprDef.ECast({ expr : haxe_macro_ExprDef.EParenthesis({ expr : haxe_macro_ExprDef.ECheckType(e8,t2), pos : pu}), pos : pu},null), pos : haxeparser_HaxeParser.punion(_g2,pu)});
 									} else {
 										throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 									}
-								} catch( _6 ) {
-									var _7 = ((_6) instanceof js__$Boot_HaxeError) ? _6.val : _6;
-									if(((_7) instanceof hxparse_NoMatch)) {
-										var _8 = _7;
-										var _g38 = this.peek(0);
-										var _g214 = _g38.pos;
-										var _g110 = _g38.tok;
-										switch(_g110._hx_index) {
+								} catch( _2 ) {
+									if(((((_2) instanceof js__$Boot_HaxeError) ? _2.val : _2) instanceof hxparse_NoMatch)) {
+										var _g13 = this.peek(0);
+										var _g22 = _g13.pos;
+										var _g14 = _g13.tok;
+										switch(_g14._hx_index) {
 										case 1:
-											var _g39 = _g110.c;
-											if(_g39._hx_index == 3) {
-												if(_g39.s == "is") {
-													var p_is = _g214;
+											var _g31 = _g14.c;
+											if(_g31._hx_index == 3) {
+												if(_g31.s == "is") {
 													this.last = this.token.elt;
 													this.token = this.token.next;
 													var t3 = this.parseTypePath();
-													var _g40 = this.peek(0);
-													if(_g40.tok._hx_index == 19) {
-														var p25 = _g40.pos;
+													var _g15 = this.peek(0);
+													if(_g15.tok._hx_index == 19) {
 														this.last = this.token.elt;
 														this.token = this.token.next;
-														var e_is = haxeparser_HaxeParser.makeIs(e11,t3,haxeparser_HaxeParser.punion(p18,p25),p_is);
-														return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e_is,null), pos : haxeparser_HaxeParser.punion(p18,e_is.pos)});
+														var e_is = haxeparser_HaxeParser.makeIs(e8,t3,haxeparser_HaxeParser.punion(_g2,_g15.pos),_g22);
+														return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e_is,null), pos : haxeparser_HaxeParser.punion(_g2,e_is.pos)});
 													} else {
 														throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 													}
@@ -5800,96 +5090,75 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 											}
 											break;
 										case 19:
-											var p26 = _g214;
 											this.last = this.token.elt;
 											this.token = this.token.next;
-											var ep1 = this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis(e11), pos : haxeparser_HaxeParser.punion(pp,p26)});
-											return this.exprNext({ expr : haxe_macro_ExprDef.ECast(ep1,null), pos : haxeparser_HaxeParser.punion(p18,ep1.pos)});
+											var ep = this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis(e8), pos : haxeparser_HaxeParser.punion(_g21,_g22)});
+											return this.exprNext({ expr : haxe_macro_ExprDef.ECast(ep,null), pos : haxeparser_HaxeParser.punion(_g2,ep.pos)});
 										default:
 											throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 										}
 									} else {
-										throw _6;
+										throw _2;
 									}
 								}
 							}
 						} else {
-							var e12 = this.secureExpr();
-							return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e12,null), pos : haxeparser_HaxeParser.punion(p18,e12.pos)});
+							var e9 = this.secureExpr();
+							return this.exprNext({ expr : haxe_macro_ExprDef.ECast(e9,null), pos : haxeparser_HaxeParser.punion(_g2,e9.pos)});
 						}
 						break;
 					case 34:
-						var p8 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e13 = this.secureExpr();
-						return haxeparser_HaxeParser.makeMeta(":inline",[],e13,p8);
+						return haxeparser_HaxeParser.makeMeta(":inline",[],this.secureExpr(),_g2);
 					case 36:
-						var p9 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("null")), pos : p9});
+						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("null")), pos : _g2});
 					case 37:
-						var p10 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("true")), pos : p10});
+						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("true")), pos : _g2});
 					case 38:
-						var p19 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("false")), pos : p19});
+						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("false")), pos : _g2});
 					case 40:
-						var p20 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g43 = this.peek(0);
-						if(_g43.tok._hx_index == 10) {
-							var pd = _g43.pos;
+						var _g16 = this.peek(0);
+						if(_g16.tok._hx_index == 10) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var e14 = this.parseField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("macro")), pos : p20},pd);
-							return e14;
+							return this.parseField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("macro")), pos : _g2},_g16.pos);
 						} else {
-							var e15 = this.parseMacroExpr(p20);
-							return e15;
+							return this.parseMacroExpr(_g2);
 						}
 						break;
 					case 41:
-						var p110 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var v1 = this.parseVarDecl(true);
-						return { expr : haxe_macro_ExprDef.EVars([v1]), pos : p110};
+						return { expr : haxe_macro_ExprDef.EVars([this.parseVarDecl(true)]), pos : _g2};
 					default:
 						throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 					}
 					break;
 				case 1:
-					var p27 = _g2;
-					var c = _g1.c;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					return this.exprNext({ expr : haxe_macro_ExprDef.EConst(c), pos : p27});
+					return this.exprNext({ expr : haxe_macro_ExprDef.EConst(_g1.c), pos : _g2});
 				case 3:
-					var p28 = _g2;
-					var v2 = _g1.s;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("$" + v2)), pos : p28});
+					return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("$" + _g1.s)), pos : _g2});
 				case 4:
-					var p111 = _g2;
-					var op = _g1.op;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var e16 = this.expr();
-					return haxeparser_HaxeParser.makeUnop(op,e16,p111);
+					return haxeparser_HaxeParser.makeUnop(_g1.op,this.expr(),_g2);
 				case 5:
 					if(_g1.op._hx_index == 3) {
-						var p112 = _g2;
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e17 = this.expr();
 						var neg = function(s) {
 							if(HxOverrides.cca(s,0) == 45) {
 								return HxOverrides.substr(s,1,null);
@@ -5897,171 +5166,143 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 								return "-" + s;
 							}
 						};
-						var _g44 = haxeparser_HaxeParser.makeUnop(haxe_macro_Unop.OpNeg,e17,p112);
-						var _g215 = _g44.pos;
-						var _g111 = _g44.expr;
-						if(_g111._hx_index == 9) {
-							var _g53 = _g111.e;
-							if(_g111.op._hx_index == 3) {
-								if(_g111.postFix == false) {
-									var _g71 = _g53.pos;
-									var _g61 = _g53.expr;
+						var _g17 = haxeparser_HaxeParser.makeUnop(haxe_macro_Unop.OpNeg,this.expr(),_g2);
+						var _g23 = _g17.pos;
+						var _g18 = _g17.expr;
+						if(_g18._hx_index == 9) {
+							if(_g18.op._hx_index == 3) {
+								if(_g18.postFix == false) {
+									var _g61 = _g18.e.expr;
 									if(_g61._hx_index == 0) {
 										var _g81 = _g61.c;
 										switch(_g81._hx_index) {
 										case 0:
-											var p29 = _g215;
-											var i = _g81.v;
-											return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(neg(i))), pos : p29};
+											return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(neg(_g81.v))), pos : _g23};
 										case 1:
-											var p30 = _g215;
-											var j = _g81.f;
-											return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(neg(j))), pos : p30};
+											return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(neg(_g81.f))), pos : _g23};
 										default:
-											var e18 = _g44;
-											return e18;
+											return _g17;
 										}
 									} else {
-										var e19 = _g44;
-										return e19;
+										return _g17;
 									}
 								} else {
-									var e20 = _g44;
-									return e20;
+									return _g17;
 								}
 							} else {
-								var e22 = _g44;
-								return e22;
+								return _g17;
 							}
 						} else {
-							var e23 = _g44;
-							return e23;
+							return _g17;
 						}
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 					}
 					break;
 				case 8:
-					var p113 = _g2;
-					var i1 = _g1.s;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var e24 = this.expr();
-					return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpInterval,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(i1)), pos : p113},e24);
+					var e21 = this.expr();
+					return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpInterval,{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CInt(_g1.s)), pos : _g2},e21);
 				case 14:
-					var p114 = _g2;
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var l = this.parseArrayDecl();
-					var _g45 = this.peek(0);
-					if(_g45.tok._hx_index == 15) {
-						var p210 = _g45.pos;
+					var _g19 = this.peek(0);
+					if(_g19.tok._hx_index == 15) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						return this.exprNext({ expr : haxe_macro_ExprDef.EArrayDecl(l), pos : haxeparser_HaxeParser.punion(p114,p210)});
+						return this.exprNext({ expr : haxe_macro_ExprDef.EArrayDecl(l), pos : haxeparser_HaxeParser.punion(_g2,_g19.pos)});
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
 					break;
 				case 16:
-					var p115 = _g2;
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var b = this.block1();
-					var _g46 = this.peek(0);
-					if(_g46.tok._hx_index == 17) {
-						var p211 = _g46.pos;
+					var _g20 = this.peek(0);
+					if(_g20.tok._hx_index == 17) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var e25 = { expr : b, pos : haxeparser_HaxeParser.punion(p115,p211)};
+						var e10 = { expr : b, pos : haxeparser_HaxeParser.punion(_g2,_g20.pos)};
 						if(b._hx_index == 5) {
-							var _g47 = b.fields;
-							return this.exprNext(e25);
+							return this.exprNext(e10);
 						} else {
-							return e25;
+							return e10;
 						}
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
 					break;
 				case 18:
-					var p116 = _g2;
+					var p1 = _g2;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var _g48 = this.peek(0);
-					var _g216 = _g48.pos;
-					switch(_g48.tok._hx_index) {
+					switch(this.peek(0).tok._hx_index) {
 					case 19:
-						var p212 = _g216;
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var er = this.arrowExpr();
-						return this.arrowFunction(p116,[],er);
+						return this.arrowFunction(p1,[],er);
 					case 20:
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var al1 = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-						var _g49 = this.peek(0);
-						var _g217 = _g49.pos;
-						if(_g49.tok._hx_index == 19) {
+						if(this.peek(0).tok._hx_index == 19) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var er1 = this.arrowExpr();
 							if(al1.length > 0) {
 								al1[1].opt = true;
 							}
-							return this.arrowFunction(p116,al1,er1);
+							return this.arrowFunction(p1,al1,er1);
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
 						break;
 					default:
-						var e26 = this.expr();
-						var _g50 = this.peek(0);
-						var _g218 = _g50.pos;
-						switch(_g50.tok._hx_index) {
+						var e11 = this.expr();
+						var _g24 = this.peek(0);
+						var _g25 = _g24.pos;
+						switch(_g24.tok._hx_index) {
 						case 13:
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var al2 = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-							var _g54 = this.peek(0);
-							var _g219 = _g54.pos;
-							if(_g54.tok._hx_index == 19) {
+							if(this.peek(0).tok._hx_index == 19) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
 								var er2 = this.arrowExpr();
-								var tmp = haxeparser_HaxeParser.aunshift(al2,this.arrowFirstParam(e26));
-								return this.arrowFunction(p116,tmp,er2);
+								var tmp = haxeparser_HaxeParser.aunshift(al2,this.arrowFirstParam(e11));
+								return this.arrowFunction(p1,tmp,er2);
 							} else {
 								throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 							}
 							break;
 						case 19:
-							var p213 = _g218;
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							return this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis(e26), pos : haxeparser_HaxeParser.punion(p116,p213)});
+							return this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis(e11), pos : haxeparser_HaxeParser.punion(p1,_g25)});
 						default:
 							try {
 								var t4 = this.parseTypeHint();
-								var _g55 = this.peek(0);
-								var _g220 = _g55.pos;
-								var _g112 = _g55.tok;
-								switch(_g112._hx_index) {
+								var _g26 = this.peek(0);
+								var _g27 = _g26.pos;
+								var _g110 = _g26.tok;
+								switch(_g110._hx_index) {
 								case 5:
-									if(_g112.op._hx_index == 4) {
-										var p214 = _g220;
+									if(_g110.op._hx_index == 4) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
 										var ea1 = this.expr();
 										var withArgs = function(al3,er3) {
-											var _g56 = e26.expr;
-											if(_g56._hx_index == 0) {
-												var _g113 = _g56.c;
-												if(_g113._hx_index == 3) {
-													var n = _g113.s;
-													var withArgs1 = haxeparser_HaxeParser.aunshift(al3,{ name : n, opt : true, meta : [], type : t4, value : ea1});
-													return _gthis.arrowFunction(p116,withArgs1,er3);
+											var _g28 = e11.expr;
+											if(_g28._hx_index == 0) {
+												var _g111 = _g28.c;
+												if(_g111._hx_index == 3) {
+													var withArgs1 = haxeparser_HaxeParser.aunshift(al3,{ name : _g111.s, opt : true, meta : [], type : t4, value : ea1});
+													return _gthis.arrowFunction(p1,withArgs1,er3);
 												} else {
 													throw new js__$Boot_HaxeError(new hxparse_Unexpected(_gthis.peek(0),_gthis.stream.curPos()));
 												}
@@ -6069,20 +5310,15 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 												throw new js__$Boot_HaxeError(new hxparse_Unexpected(_gthis.peek(0),_gthis.stream.curPos()));
 											}
 										};
-										var _g57 = this.peek(0);
-										var _g221 = _g57.pos;
-										switch(_g57.tok._hx_index) {
+										switch(this.peek(0).tok._hx_index) {
 										case 13:
 											this.last = this.token.elt;
 											this.token = this.token.next;
 											var al4 = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-											var _g58 = this.peek(0);
-											var _g222 = _g58.pos;
-											if(_g58.tok._hx_index == 19) {
+											if(this.peek(0).tok._hx_index == 19) {
 												this.last = this.token.elt;
 												this.token = this.token.next;
-												var er4 = this.arrowExpr();
-												return withArgs(al4,er4);
+												return withArgs(al4,this.arrowExpr());
 											} else {
 												throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 											}
@@ -6090,8 +5326,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 										case 19:
 											this.last = this.token.elt;
 											this.token = this.token.next;
-											var er5 = this.arrowExpr();
-											return withArgs([],er5);
+											return withArgs([],this.arrowExpr());
 										default:
 											throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 										}
@@ -6100,52 +5335,43 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 									}
 									break;
 								case 13:
-									var p215 = _g220;
 									this.last = this.token.elt;
 									this.token = this.token.next;
 									var al5 = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseFunParam));
-									var _g59 = this.peek(0);
-									var _g223 = _g59.pos;
-									if(_g59.tok._hx_index == 19) {
+									if(this.peek(0).tok._hx_index == 19) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										var er6 = this.arrowExpr();
-										var np = this.arrowIdentChecktype(e26);
-										var tmp1 = haxeparser_HaxeParser.aunshift(al5,{ name : np.name, opt : false, meta : [], type : t4, value : null});
-										return this.arrowFunction(p116,tmp1,er6);
+										var er4 = this.arrowExpr();
+										var tmp1 = haxeparser_HaxeParser.aunshift(al5,{ name : this.arrowIdentChecktype(e11).name, opt : false, meta : [], type : t4, value : null});
+										return this.arrowFunction(p1,tmp1,er4);
 									} else {
 										throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 									}
 									break;
 								case 19:
-									var p216 = _g220;
 									this.last = this.token.elt;
 									this.token = this.token.next;
-									return this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis({ expr : haxe_macro_ExprDef.ECheckType(e26,t4), pos : haxeparser_HaxeParser.punion(p116,p216)}), pos : haxeparser_HaxeParser.punion(p116,p216)});
+									return this.exprNext({ expr : haxe_macro_ExprDef.EParenthesis({ expr : haxe_macro_ExprDef.ECheckType(e11,t4), pos : haxeparser_HaxeParser.punion(p1,_g27)}), pos : haxeparser_HaxeParser.punion(p1,_g27)});
 								default:
 									throw new js__$Boot_HaxeError(new hxparse_NoMatch(this.stream.curPos(),this.peek(0)));
 								}
-							} catch( _9 ) {
-								var _10 = ((_9) instanceof js__$Boot_HaxeError) ? _9.val : _9;
-								if(((_10) instanceof hxparse_NoMatch)) {
-									var _11 = _10;
-									var _g60 = this.peek(0);
-									var _g114 = _g60.tok;
-									if(_g114._hx_index == 1) {
-										var _g310 = _g114.c;
-										if(_g310._hx_index == 3) {
-											if(_g310.s == "is") {
-												var p_is1 = _g60.pos;
+							} catch( _3 ) {
+								if(((((_3) instanceof js__$Boot_HaxeError) ? _3.val : _3) instanceof hxparse_NoMatch)) {
+									var _g29 = this.peek(0);
+									var _g210 = _g29.pos;
+									var _g112 = _g29.tok;
+									if(_g112._hx_index == 1) {
+										var _g32 = _g112.c;
+										if(_g32._hx_index == 3) {
+											if(_g32.s == "is") {
 												this.last = this.token.elt;
 												this.token = this.token.next;
 												var t5 = this.parseTypePath();
-												var _g62 = this.peek(0);
-												if(_g62.tok._hx_index == 19) {
-													var p217 = _g62.pos;
+												var _g30 = this.peek(0);
+												if(_g30.tok._hx_index == 19) {
 													this.last = this.token.elt;
 													this.token = this.token.next;
-													var tmp2 = haxeparser_HaxeParser.punion(p116,p217);
-													return this.exprNext(haxeparser_HaxeParser.makeIs(e26,t5,tmp2,p_is1));
+													return this.exprNext(haxeparser_HaxeParser.makeIs(e11,t5,haxeparser_HaxeParser.punion(p1,_g30.pos),_g210));
 												} else {
 													throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 												}
@@ -6159,7 +5385,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 										throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 									}
 								} else {
-									throw _9;
+									throw _3;
 								}
 							}
 						}
@@ -6186,9 +5412,7 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			if(_g3._hx_index == 7) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g4 = this.peek(0);
-				var _g21 = _g4.pos;
-				var _g11 = _g4.tok;
+				var _g11 = this.peek(0).tok;
 				if(_g11._hx_index == 5) {
 					switch(_g11.op._hx_index) {
 					case 4:
@@ -6198,68 +5422,52 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					case 7:
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var _g5 = this.peek(0);
-						var _g22 = _g5.pos;
-						var _g12 = _g5.tok;
+						var _g12 = this.peek(0).tok;
 						if(_g12._hx_index == 5) {
 							switch(_g12.op._hx_index) {
 							case 4:
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var e2 = this.expr();
-								return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpAssignOp(haxe_macro_Binop.OpShr),e1,e2);
+								return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpAssignOp(haxe_macro_Binop.OpShr),e1,this.expr());
 							case 7:
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var _g6 = this.peek(0);
-								var _g23 = _g6.pos;
-								var _g13 = _g6.tok;
+								var _g13 = this.peek(0).tok;
 								if(_g13._hx_index == 5) {
 									if(_g13.op._hx_index == 4) {
 										this.last = this.token.elt;
 										this.token = this.token.next;
-										var e21 = this.expr();
-										return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpAssignOp(haxe_macro_Binop.OpUShr),e1,e21);
+										return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpAssignOp(haxe_macro_Binop.OpUShr),e1,this.expr());
 									} else {
-										var e22 = this.secureExpr();
-										return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpUShr,e1,e22);
+										return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpUShr,e1,this.secureExpr());
 									}
 								} else {
-									var e23 = this.secureExpr();
-									return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpUShr,e1,e23);
+									return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpUShr,e1,this.secureExpr());
 								}
 								break;
 							default:
-								var e24 = this.secureExpr();
-								return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpShr,e1,e24);
+								return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpShr,e1,this.secureExpr());
 							}
 						} else {
-							var e25 = this.secureExpr();
-							return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpShr,e1,e25);
+							return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpShr,e1,this.secureExpr());
 						}
 						break;
 					default:
-						var e26 = this.secureExpr();
-						return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpGt,e1,e26);
+						return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpGt,e1,this.secureExpr());
 					}
 				} else {
-					var e27 = this.secureExpr();
-					return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpGt,e1,e27);
+					return haxeparser_HaxeParser.makeBinop(haxe_macro_Binop.OpGt,e1,this.secureExpr());
 				}
 			} else {
-				var op = _g3;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var e28 = this.expr();
-				return haxeparser_HaxeParser.makeBinop(op,e1,e28);
+				return haxeparser_HaxeParser.makeBinop(_g3,e1,this.expr());
 			}
 			break;
 		case 10:
-			var p = _g2;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var e = this.parseField(e1,p);
-			return e;
+			return this.parseField(e1,_g2);
 		case 12:
 			this.last = this.token.elt;
 			this.token = this.token.next;
@@ -6268,13 +5476,12 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 14:
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var e29 = this.expr();
-			var _g7 = this.peek(0);
-			if(_g7.tok._hx_index == 15) {
-				var p2 = _g7.pos;
+			var e2 = this.expr();
+			var _g4 = this.peek(0);
+			if(_g4.tok._hx_index == 15) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EArray(e1,e29), pos : haxeparser_HaxeParser.punion(e1.pos,p2)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EArray(e1,e2), pos : haxeparser_HaxeParser.punion(e1.pos,_g4.pos)});
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
@@ -6284,19 +5491,16 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			this.token = this.token.next;
 			try {
 				var params = this.parseCallParams();
-				var _g8 = this.peek(0);
-				if(_g8.tok._hx_index == 19) {
-					var p21 = _g8.pos;
+				var _g5 = this.peek(0);
+				if(_g5.tok._hx_index == 19) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					return this.exprNext({ expr : haxe_macro_ExprDef.ECall(e1,params), pos : haxeparser_HaxeParser.punion(e1.pos,p21)});
+					return this.exprNext({ expr : haxe_macro_ExprDef.ECall(e1,params), pos : haxeparser_HaxeParser.punion(e1.pos,_g5.pos)});
 				} else {
 					throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 				}
 			} catch( _ ) {
-				var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-				if(((_1) instanceof hxparse_NoMatch)) {
-					var _2 = _1;
+				if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 					throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 				} else {
 					throw _;
@@ -6306,47 +5510,42 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		case 20:
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			var e210 = this.expr();
-			var _g9 = this.peek(0);
-			var _g24 = _g9.pos;
-			if(_g9.tok._hx_index == 11) {
+			var e21 = this.expr();
+			if(this.peek(0).tok._hx_index == 11) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var e3 = this.expr();
-				return { expr : haxe_macro_ExprDef.ETernary(e1,e210,e3), pos : haxeparser_HaxeParser.punion(e1.pos,e3.pos)};
+				return { expr : haxe_macro_ExprDef.ETernary(e1,e21,e3), pos : haxeparser_HaxeParser.punion(e1.pos,e3.pos)};
 			} else {
 				throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 			}
 			break;
 		default:
-			var _g10 = this.peek(0);
-			var _g14 = _g10.tok;
+			var _g6 = this.peek(0);
+			var _g14 = _g6.tok;
 			if(_g14._hx_index == 4) {
-				var p1 = _g10.pos;
-				var op1 = _g14.op;
-				if(haxeparser_HaxeParser.isPostfix(e1,op1)) {
+				var _g31 = _g14.op;
+				if(haxeparser_HaxeParser.isPostfix(e1,_g31)) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					return this.exprNext({ expr : haxe_macro_ExprDef.EUnop(op1,true,e1), pos : haxeparser_HaxeParser.punion(e1.pos,p1)});
+					return this.exprNext({ expr : haxe_macro_ExprDef.EUnop(_g31,true,e1), pos : haxeparser_HaxeParser.punion(e1.pos,_g6.pos)});
 				} else {
-					var _g15 = this.peek(0);
-					if(_g15.tok._hx_index == 16) {
-						var p11 = _g15.pos;
+					var _g7 = this.peek(0);
+					var _g21 = _g7.pos;
+					if(_g7.tok._hx_index == 16) {
 						if(haxeparser_HaxeParser.isDollarIdent(e1)) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							var eparam = this.expr();
-							var _g16 = this.peek(0);
-							if(_g16.tok._hx_index == 17) {
-								var p22 = _g16.pos;
+							var _g8 = this.peek(0);
+							if(_g8.tok._hx_index == 17) {
 								this.last = this.token.elt;
 								this.token = this.token.next;
-								var _g17 = e1.expr;
-								if(_g17._hx_index == 0) {
-									var _g18 = _g17.c;
-									if(_g18._hx_index == 3) {
-										var n = _g18.s;
-										return this.exprNext({ expr : haxe_macro_ExprDef.EMeta({ name : n, params : [], pos : e1.pos},eparam), pos : haxeparser_HaxeParser.punion(p11,p22)});
+								var _g9 = e1.expr;
+								if(_g9._hx_index == 0) {
+									var _g15 = _g9.c;
+									if(_g15._hx_index == 3) {
+										return this.exprNext({ expr : haxe_macro_ExprDef.EMeta({ name : _g15.s, params : [], pos : e1.pos},eparam), pos : haxeparser_HaxeParser.punion(_g21,_g8.pos)});
 									} else {
 										throw new js__$Boot_HaxeError(false);
 									}
@@ -6364,24 +5563,22 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 					}
 				}
 			} else {
-				var _g19 = this.peek(0);
-				if(_g19.tok._hx_index == 16) {
-					var p12 = _g19.pos;
+				var _g10 = this.peek(0);
+				var _g22 = _g10.pos;
+				if(_g10.tok._hx_index == 16) {
 					if(haxeparser_HaxeParser.isDollarIdent(e1)) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						var eparam1 = this.expr();
-						var _g20 = this.peek(0);
-						if(_g20.tok._hx_index == 17) {
-							var p23 = _g20.pos;
+						var _g16 = this.peek(0);
+						if(_g16.tok._hx_index == 17) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
-							var _g25 = e1.expr;
-							if(_g25._hx_index == 0) {
-								var _g110 = _g25.c;
-								if(_g110._hx_index == 3) {
-									var n1 = _g110.s;
-									return this.exprNext({ expr : haxe_macro_ExprDef.EMeta({ name : n1, params : [], pos : e1.pos},eparam1), pos : haxeparser_HaxeParser.punion(p12,p23)});
+							var _g17 = e1.expr;
+							if(_g17._hx_index == 0) {
+								var _g18 = _g17.c;
+								if(_g18._hx_index == 3) {
+									return this.exprNext({ expr : haxe_macro_ExprDef.EMeta({ name : _g18.s, params : [], pos : e1.pos},eparam1), pos : haxeparser_HaxeParser.punion(_g22,_g16.pos)});
 								} else {
 									throw new js__$Boot_HaxeError(false);
 								}
@@ -6409,45 +5606,37 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			var _g3 = _g1.k;
 			switch(_g3._hx_index) {
 			case 22:
-				var p2 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"new"), pos : haxeparser_HaxeParser.punion(e1.pos,p2)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"new"), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 			case 25:
-				var p21 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"extern"), pos : haxeparser_HaxeParser.punion(e1.pos,p21)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"extern"), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 			case 40:
-				var p22 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"macro"), pos : haxeparser_HaxeParser.punion(e1.pos,p22)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"macro"), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 			default:
-				var p23 = _g2;
-				var k = _g3;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,haxeparser_KeywordPrinter.toString(k)), pos : haxeparser_HaxeParser.punion(e1.pos,p23)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,haxeparser_KeywordPrinter.toString(_g3)), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 			}
 			break;
 		case 1:
 			var _g4 = _g1.c;
 			if(_g4._hx_index == 3) {
-				var p24 = _g2;
-				var f = _g4.s;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,f), pos : haxeparser_HaxeParser.punion(e1.pos,p24)});
+				return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,_g4.s), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 			} else {
+				var _g11 = e1.pos;
 				var _g5 = e1.expr;
 				if(_g5._hx_index == 0) {
 					var _g21 = _g5.c;
 					if(_g21._hx_index == 0) {
-						var p25 = e1.pos;
-						var v = _g21.v;
-						if(p25.max == p.min) {
-							return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(v + ".")), pos : haxeparser_HaxeParser.punion(p,p25)});
+						if(_g11.max == p.min) {
+							return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(_g21.v + ".")), pos : haxeparser_HaxeParser.punion(p,_g11)});
 						} else {
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
@@ -6460,20 +5649,17 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			}
 			break;
 		case 3:
-			var p26 = _g2;
-			var v1 = _g1.s;
 			this.last = this.token.elt;
 			this.token = this.token.next;
-			return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"$" + v1), pos : haxeparser_HaxeParser.punion(e1.pos,p26)});
+			return this.exprNext({ expr : haxe_macro_ExprDef.EField(e1,"$" + _g1.s), pos : haxeparser_HaxeParser.punion(e1.pos,_g2)});
 		default:
+			var _g12 = e1.pos;
 			var _g6 = e1.expr;
 			if(_g6._hx_index == 0) {
 				var _g22 = _g6.c;
 				if(_g22._hx_index == 0) {
-					var p27 = e1.pos;
-					var v2 = _g22.v;
-					if(p27.max == p.min) {
-						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(v2 + ".")), pos : haxeparser_HaxeParser.punion(p,p27)});
+					if(_g12.max == p.min) {
+						return this.exprNext({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CFloat(_g22.v + ".")), pos : haxeparser_HaxeParser.punion(p,_g12)});
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
@@ -6486,22 +5672,16 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		}
 	}
 	,parseGuard: function() {
-		var _g = this.peek(0);
-		var _g2 = _g.pos;
-		var _g1 = _g.tok;
+		var _g1 = this.peek(0).tok;
 		if(_g1._hx_index == 0) {
 			if(_g1.k._hx_index == 3) {
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g3 = this.peek(0);
-				var _g21 = _g3.pos;
-				if(_g3.tok._hx_index == 18) {
+				if(this.peek(0).tok._hx_index == 18) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var e = this.expr();
-					var _g4 = this.peek(0);
-					var _g22 = _g4.pos;
-					if(_g4.tok._hx_index == 19) {
+					if(this.peek(0).tok._hx_index == 19) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
 						return e;
@@ -6525,24 +5705,18 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 		if(_g1._hx_index == 0) {
 			switch(_g1.k._hx_index) {
 			case 2:
-				var p1 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var name = this.dollarIdent();
-				return { expr : haxe_macro_ExprDef.EVars([{ name : name.name, type : null, expr : null}]), pos : p1};
+				return { expr : haxe_macro_ExprDef.EVars([{ name : this.dollarIdent().name, type : null, expr : null}]), pos : _g2};
 			case 41:
-				var p11 = _g2;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var name1 = this.dollarIdent();
-				return { expr : haxe_macro_ExprDef.EVars([{ name : name1.name, type : null, expr : null}]), pos : p11};
+				return { expr : haxe_macro_ExprDef.EVars([{ name : this.dollarIdent().name, type : null, expr : null}]), pos : _g2};
 			default:
-				var e = this.expr();
-				return e;
+				return this.expr();
 			}
 		} else {
-			var e1 = this.expr();
-			return e1;
+			return this.expr();
 		}
 	}
 	,parseSwitchCases: function() {
@@ -6553,12 +5727,8 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 				return null;
 			} else if(b.length == 1) {
 				var _g = b[0];
-				var _g2 = _g.pos;
-				var _g1 = _g.expr;
-				if(_g1._hx_index == 12) {
-					var el = _g1.exprs;
-					var e = _g;
-					return e;
+				if(_g.expr._hx_index == 12) {
+					return _g;
 				} else {
 					return { expr : haxe_macro_ExprDef.EBlock(b), pos : p};
 				}
@@ -6567,47 +5737,38 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 			}
 		};
 		_hx_loop1: while(true) {
-			var _g3 = this.peek(0);
-			var _g21 = _g3.pos;
-			var _g11 = _g3.tok;
+			var _g1 = this.peek(0);
+			var _g2 = _g1.pos;
+			var _g11 = _g1.tok;
 			if(_g11._hx_index == 0) {
 				switch(_g11.k._hx_index) {
 				case 15:
-					var p1 = _g21;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var el1 = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseExprOrVar));
+					var el = this.psep(haxeparser_TokenDef.Comma,$bind(this,this.parseExprOrVar));
 					var eg = this.parseOptional($bind(this,this.parseGuard));
-					var _g4 = this.peek(0);
-					var _g22 = _g4.pos;
-					if(_g4.tok._hx_index == 11) {
+					if(this.peek(0).tok._hx_index == 11) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var b1 = this.block([]);
-						var e1 = caseBlock(b1,p1);
-						cases.push({ values : el1, guard : eg, expr : e1});
+						cases.push({ values : el, guard : eg, expr : caseBlock(this.block([]),_g2)});
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
 					break;
 				case 16:
-					var p11 = _g21;
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					var _g5 = this.peek(0);
-					var _g23 = _g5.pos;
-					if(_g5.tok._hx_index == 11) {
+					if(this.peek(0).tok._hx_index == 11) {
 						this.last = this.token.elt;
 						this.token = this.token.next;
-						var b2 = this.block([]);
-						var e2 = caseBlock(b2,p11);
-						if(e2 == null) {
-							e2 = { expr : null, pos : p11};
+						var e = caseBlock(this.block([]),_g2);
+						if(e == null) {
+							e = { expr : null, pos : _g2};
 						}
 						if(def != null) {
-							throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.DuplicateDefault,p11));
+							throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.DuplicateDefault,_g2));
 						}
-						def = e2;
+						def = e;
 					} else {
 						throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 					}
@@ -6623,23 +5784,19 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	}
 	,parseCatch: function() {
 		var _g = this.peek(0);
+		var _g2 = _g.pos;
 		var _g1 = _g.tok;
 		if(_g1._hx_index == 0) {
 			if(_g1.k._hx_index == 21) {
-				var p = _g.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var _g2 = this.peek(0);
-				var _g21 = _g2.pos;
-				if(_g2.tok._hx_index == 18) {
+				if(this.peek(0).tok._hx_index == 18) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var id = this.ident();
 					try {
 						var t = this.parseTypeHint();
-						var _g3 = this.peek(0);
-						var _g22 = _g3.pos;
-						if(_g3.tok._hx_index == 19) {
+						if(this.peek(0).tok._hx_index == 19) {
 							this.last = this.token.elt;
 							this.token = this.token.next;
 							return { name : id.name, type : t, expr : this.secureExpr()};
@@ -6647,10 +5804,8 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 							throw new js__$Boot_HaxeError(new hxparse_Unexpected(this.peek(0),this.stream.curPos()));
 						}
 					} catch( _ ) {
-						var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-						if(((_1) instanceof hxparse_NoMatch)) {
-							var _2 = _1;
-							throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.MissingType,p));
+						if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
+							throw new js__$Boot_HaxeError(new haxeparser_ParserError(haxeparser_ParserErrorMsg.MissingType,_g2));
 						} else {
 							throw _;
 						}
@@ -6668,28 +5823,20 @@ haxeparser_HaxeParser.prototype = $extend(hxparse_Parser_$haxeparser_$HaxeTokenS
 	,parseCallParams: function() {
 		var ret = [];
 		try {
-			var e = this.expr();
-			ret.push(e);
+			ret.push(this.expr());
 		} catch( _ ) {
-			var _1 = ((_) instanceof js__$Boot_HaxeError) ? _.val : _;
-			if(((_1) instanceof hxparse_NoMatch)) {
-				var _2 = _1;
+			if(((((_) instanceof js__$Boot_HaxeError) ? _.val : _) instanceof hxparse_NoMatch)) {
 				return [];
 			} else {
 				throw _;
 			}
 		}
-		while(true) {
-			var _g = this.peek(0);
-			var _g2 = _g.pos;
-			if(_g.tok._hx_index == 13) {
-				this.last = this.token.elt;
-				this.token = this.token.next;
-				var e1 = this.expr();
-				ret.push(e1);
-			} else {
-				break;
-			}
+		while(true) if(this.peek(0).tok._hx_index == 13) {
+			this.last = this.token.elt;
+			this.token = this.token.next;
+			ret.push(this.expr());
+		} else {
+			break;
 		}
 		return ret;
 	}
@@ -6718,22 +5865,15 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		};
 		switch(c._hx_index) {
 		case 0:
-			var i = c.v;
-			return cst("CInt",i);
+			return cst("CInt",c.v);
 		case 1:
-			var s = c.f;
-			return cst("CFloat",s);
+			return cst("CFloat",c.f);
 		case 2:
-			var _g6 = c.kind;
-			var s1 = c.s;
-			return cst("CString",s1);
+			return cst("CString",c.s);
 		case 3:
-			var s2 = c.s;
-			return cst("CIdent",s2);
+			return cst("CIdent",c.s);
 		case 4:
-			var o = c.opt;
-			var r = c.r;
-			return this.mkEnum("Constant","CRegexp",[{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(r)), pos : p},{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(o)), pos : p}],p);
+			return this.mkEnum("Constant","CRegexp",[{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(c.r)), pos : p},{ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(c.opt)), pos : p}],p);
 		}
 	}
 	,toBinop: function(o,p) {
@@ -6783,8 +5923,7 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		case 19:
 			return op("OpMod");
 		case 20:
-			var o1 = o.op;
-			return this.mkEnum("Binop","OpAssignOp",[this.toBinop(o1,p)],p);
+			return this.mkEnum("Binop","OpAssignOp",[this.toBinop(o.op,p)],p);
 		case 21:
 			return op("OpInterval");
 		case 22:
@@ -6794,8 +5933,7 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		}
 	}
 	,toString: function(s,p) {
-		var len = s.length;
-		if(len > 1 && s.charAt(0) == "$") {
+		if(s.length > 1 && s.charAt(0) == "$") {
 			return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent(HxOverrides.substr(s,1,null))), pos : p};
 		} else {
 			return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CString(s)), pos : p};
@@ -6804,13 +5942,8 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 	,toArray: function(f,a,p) {
 		var vals = [];
 		var _g = 0;
-		while(_g < a.length) {
-			var v = a[_g];
-			++_g;
-			vals.push(f(v,p));
-		}
-		var e = { pos : p, expr : haxe_macro_ExprDef.EArrayDecl(vals)};
-		return e;
+		while(_g < a.length) vals.push(f(a[_g++],p));
+		return { pos : p, expr : haxe_macro_ExprDef.EArrayDecl(vals)};
 	}
 	,toNull: function(p) {
 		return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("null")), pos : p};
@@ -6823,8 +5956,7 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		}
 	}
 	,toBool: function(o,p) {
-		var s = o ? "true" : "false";
-		return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent(s)), pos : p};
+		return { expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent(o ? "true" : "false")), pos : p};
 	}
 	,toObj: function(fields,p) {
 		return { expr : haxe_macro_ExprDef.EObjectDecl(fields), pos : p};
@@ -6834,14 +5966,12 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		var v;
 		switch(t._hx_index) {
 		case 0:
-			var t1 = t.t;
 			n = "TPType";
-			v = this.toCType(t1,p);
+			v = this.toCType(t.t,p);
 			break;
 		case 1:
-			var e = t.e;
 			n = "TPExpr";
-			v = this.toExpr(e,p);
+			v = this.toExpr(t.e,p);
 			break;
 		}
 		return this.mkEnum("TypeParam",n,[v],p);
@@ -6866,76 +5996,57 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 			var _g7 = _g6.name;
 			if(_g6.pack.length == 0) {
 				if(_g9 == null) {
-					var t1 = _g6;
-					return ct("TPath",[this.toTPath(t1,p)]);
+					return ct("TPath",[this.toTPath(_g6,p)]);
 				} else if(_g9.length == 0) {
 					if(_g10 == null) {
-						var n1 = _g7;
-						if(n1.charAt(0) == "$") {
-							return this.toString(n1,p);
+						if(_g7.charAt(0) == "$") {
+							return this.toString(_g7,p);
 						} else {
-							var t2 = _g6;
-							return ct("TPath",[this.toTPath(t2,p)]);
+							return ct("TPath",[this.toTPath(_g6,p)]);
 						}
 					} else {
-						var t3 = _g6;
-						return ct("TPath",[this.toTPath(t3,p)]);
+						return ct("TPath",[this.toTPath(_g6,p)]);
 					}
 				} else {
-					var t4 = _g6;
-					return ct("TPath",[this.toTPath(t4,p)]);
+					return ct("TPath",[this.toTPath(_g6,p)]);
 				}
 			} else {
-				var t5 = _g6;
-				return ct("TPath",[this.toTPath(t5,p)]);
+				return ct("TPath",[this.toTPath(_g6,p)]);
 			}
 			break;
 		case 1:
-			var ret = t.ret;
-			var args = t.args;
-			return ct("TFunction",[this.toArray($bind(this,this.toCType),args,p),this.toCType(ret,p)]);
+			return ct("TFunction",[this.toArray($bind(this,this.toCType),t.args,p),this.toCType(t.ret,p)]);
 		case 2:
-			var fields = t.fields;
-			return ct("TAnonymous",[this.toArray($bind(this,this.toCField),fields,p)]);
+			return ct("TAnonymous",[this.toArray($bind(this,this.toCField),t.fields,p)]);
 		case 3:
-			var t6 = t.t;
-			return ct("TParent",[this.toCType(t6,p)]);
+			return ct("TParent",[this.toCType(t.t,p)]);
 		case 4:
-			var fields1 = t.fields;
-			var tl = t.p;
-			return ct("TExtend",[this.toArray($bind(this,this.toTPath),tl,p),this.toArray($bind(this,this.toCField),fields1,p)]);
+			return ct("TExtend",[this.toArray($bind(this,this.toTPath),t.p,p),this.toArray($bind(this,this.toCField),t.fields,p)]);
 		case 5:
-			var t7 = t.t;
-			return ct("TOptional",[this.toCType(t7,p)]);
+			return ct("TOptional",[this.toCType(t.t,p)]);
 		case 6:
-			var t8 = t.t;
-			var s = t.n;
-			return ct("TNamed",[this.toString(s,p),this.toCType(t8,p)]);
+			return ct("TNamed",[this.toString(t.n,p),this.toCType(t.t,p)]);
 		case 7:
-			var types = t.tl;
-			return ct("TIntersection",[this.toArray($bind(this,this.toCType),types,p)]);
+			return ct("TIntersection",[this.toArray($bind(this,this.toCType),t.tl,p)]);
 		}
 	}
 	,toFun: function(f,p) {
 		var _gthis = this;
-		var farg = function(vv,p1) {
-			var n = vv.name;
-			var o = vv.opt;
-			var t = vv.type;
-			var e = vv.value;
-			var fields = [{ field : "name", expr : _gthis.toString(n,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "opt", expr : _gthis.toBool(o,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "type", expr : _gthis.toOpt($bind(_gthis,_gthis.toCType),t,p1), quotes : haxe_macro_QuoteStatus.Unquoted}];
-			if(e != null) {
-				fields.push({ field : "value", expr : _gthis.toExpr(e,p1), quotes : haxe_macro_QuoteStatus.Unquoted});
-			}
+		var fparam = null;
+		fparam = function(t,p1) {
+			var fields = [{ field : "name", expr : _gthis.toString(t.name,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "constraints", expr : _gthis.toArray($bind(_gthis,_gthis.toCType),t.constraints,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : _gthis.toArray(fparam,t.params,p1), quotes : haxe_macro_QuoteStatus.Unquoted}];
 			return _gthis.toObj(fields,p1);
 		};
-		var fparam = null;
-		fparam = function(t1,p2) {
-			var fields1 = [{ field : "name", expr : _gthis.toString(t1.name,p2), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "constraints", expr : _gthis.toArray($bind(_gthis,_gthis.toCType),t1.constraints,p2), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : _gthis.toArray(fparam,t1.params,p2), quotes : haxe_macro_QuoteStatus.Unquoted}];
+		return this.toObj([{ field : "args", expr : this.toArray(function(vv,p2) {
+			var o = vv.opt;
+			var t1 = vv.type;
+			var e = vv.value;
+			var fields1 = [{ field : "name", expr : _gthis.toString(vv.name,p2), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "opt", expr : _gthis.toBool(o,p2), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "type", expr : _gthis.toOpt($bind(_gthis,_gthis.toCType),t1,p2), quotes : haxe_macro_QuoteStatus.Unquoted}];
+			if(e != null) {
+				fields1.push({ field : "value", expr : _gthis.toExpr(e,p2), quotes : haxe_macro_QuoteStatus.Unquoted});
+			}
 			return _gthis.toObj(fields1,p2);
-		};
-		var fields2 = [{ field : "args", expr : this.toArray(farg,f.args,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "ret", expr : this.toOpt($bind(this,this.toCType),f.ret,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "expr", expr : this.toOpt($bind(this,this.toExpr),f.expr,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toArray(fparam,f.params,p), quotes : haxe_macro_QuoteStatus.Unquoted}];
-		return this.toObj(fields2,p);
+		},f.args,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "ret", expr : this.toOpt($bind(this,this.toCType),f.ret,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "expr", expr : this.toOpt($bind(this,this.toExpr),f.expr,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toArray(fparam,f.params,p), quotes : haxe_macro_QuoteStatus.Unquoted}],p);
 	}
 	,toAccess: function(a,p) {
 		var n;
@@ -6986,7 +6097,6 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 			n = "DKMarked";
 			break;
 		case 4:
-			var _g = dk.outermost;
 			n = "DKPattern";
 			break;
 		}
@@ -6994,29 +6104,21 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 	}
 	,toCField: function(f,p) {
 		var _gthis = this;
-		var p2 = f.pos;
 		var toFType = function(k) {
 			var n;
 			var vl;
 			switch(k._hx_index) {
 			case 0:
-				var e = k.e;
-				var ct = k.t;
 				n = "FVar";
-				vl = [_gthis.toOpt($bind(_gthis,_gthis.toCType),ct,p),_gthis.toOpt($bind(_gthis,_gthis.toExpr),e,p)];
+				vl = [_gthis.toOpt($bind(_gthis,_gthis.toCType),k.t,p),_gthis.toOpt($bind(_gthis,_gthis.toExpr),k.e,p)];
 				break;
 			case 1:
-				var f1 = k.f;
 				n = "FFun";
-				vl = [_gthis.toFun(f1,p)];
+				vl = [_gthis.toFun(k.f,p)];
 				break;
 			case 2:
-				var e1 = k.e;
-				var t = k.t;
-				var set = k.set;
-				var get = k.get;
 				n = "FProp";
-				vl = [_gthis.toString(get,p),_gthis.toString(set,p),_gthis.toOpt($bind(_gthis,_gthis.toCType),t,p),_gthis.toOpt($bind(_gthis,_gthis.toExpr),e1,p)];
+				vl = [_gthis.toString(k.get,p),_gthis.toString(k.set,p),_gthis.toOpt($bind(_gthis,_gthis.toCType),k.t,p),_gthis.toOpt($bind(_gthis,_gthis.toExpr),k.e,p)];
 				break;
 			}
 			return _gthis.mkEnum("FieldType",n,vl,p);
@@ -7060,15 +6162,14 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		if(a.length > 0) {
 			var _g = a[0].expr;
 			if(_g._hx_index == 28) {
-				var e1 = _g.e;
-				var md = _g.s;
-				if(md.name == "$a" && md.params.length == 0) {
-					var _g1 = e1.expr;
-					if(_g1._hx_index == 6) {
-						var el = _g1.values;
-						return this.toExprArray(el,p);
+				var _g2 = _g.e;
+				var _g1 = _g.s;
+				if(_g1.name == "$a" && _g1.params.length == 0) {
+					var _g3 = _g2.expr;
+					if(_g3._hx_index == 6) {
+						return this.toExprArray(_g3.values,p);
 					} else {
-						return e1;
+						return _g2;
 					}
 				}
 			}
@@ -7091,58 +6192,41 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		case 0:
 			var _g48 = _g.c;
 			if(_g48._hx_index == 3) {
-				var n1 = _g48.s;
-				if(n1.charAt(0) == "$" && n1.length > 1) {
-					return this.toString(n1,p);
+				var _g49 = _g48.s;
+				if(_g49.charAt(0) == "$" && _g49.length > 1) {
+					return this.toString(_g49,p);
 				} else {
-					var c = _g48;
-					return expr("EConst",[this.toConst(c,p)]);
+					return expr("EConst",[this.toConst(_g48,p)]);
 				}
 			} else {
-				var c1 = _g48;
-				return expr("EConst",[this.toConst(c1,p)]);
+				return expr("EConst",[this.toConst(_g48,p)]);
 			}
 			break;
 		case 1:
-			var e21 = _g.e2;
-			var e11 = _g.e1;
-			return expr("EArray",[loop(e11),loop(e21)]);
+			return expr("EArray",[loop(_g.e1),loop(_g.e2)]);
 		case 2:
-			var e22 = _g.e2;
-			var e12 = _g.e1;
-			var op = _g.op;
-			return expr("EBinop",[this.toBinop(op,p),loop(e12),loop(e22)]);
+			return expr("EBinop",[this.toBinop(_g.op,p),loop(_g.e1),loop(_g.e2)]);
 		case 3:
-			var s = _g.field;
-			var e3 = _g.e;
-			return expr("EField",[loop(e3),this.toString(s,p)]);
+			return expr("EField",[loop(_g.e),this.toString(_g.field,p)]);
 		case 4:
-			var e4 = _g.e;
-			return expr("EParenthesis",[loop(e4)]);
+			return expr("EParenthesis",[loop(_g.e)]);
 		case 5:
-			var fl = _g.fields;
 			return expr("EObjectDecl",[this.toArray(function(f,p2) {
 				var tmp = { field : "field", expr : _gthis.toString(f.field,p), quotes : haxe_macro_QuoteStatus.Unquoted};
 				var tmp1 = loop(f.expr);
 				return _gthis.toObj([tmp,{ field : "expr", expr : tmp1, quotes : haxe_macro_QuoteStatus.Unquoted}],p2);
-			},fl,p)]);
+			},_g.fields,p)]);
 		case 6:
-			var el = _g.values;
-			return expr("EArrayDecl",[this.toExprArray(el,p)]);
+			return expr("EArrayDecl",[this.toExprArray(_g.values,p)]);
 		case 7:
-			var el1 = _g.params;
-			var e5 = _g.e;
-			return expr("ECall",[loop(e5),this.toExprArray(el1,p)]);
+			return expr("ECall",[loop(_g.e),this.toExprArray(_g.params,p)]);
 		case 8:
-			var el2 = _g.params;
-			var t = _g.t;
-			return expr("ENew",[this.toTPath(t,p),this.toExprArray(el2,p)]);
+			return expr("ENew",[this.toTPath(_g.t,p),this.toExprArray(_g.params,p)]);
 		case 9:
-			var e6 = _g.e;
-			var isPostfix = _g.postFix;
-			var op1 = _g.op;
+			var _g20 = _g.e;
+			var _g19 = _g.postFix;
 			var ops;
-			switch(op1._hx_index) {
+			switch(_g.op._hx_index) {
 			case 0:
 				ops = "OpIncrement";
 				break;
@@ -7159,152 +6243,117 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 				ops = "OpNegBits";
 				break;
 			}
-			var op2 = this.mkEnum("Unop",ops,[],p);
-			return expr("EUnop",[op2,this.toBool(isPostfix,p),loop(e6)]);
+			return expr("EUnop",[this.mkEnum("Unop",ops,[],p),this.toBool(_g19,p),loop(_g20)]);
 		case 10:
-			var vl1 = _g.vars;
 			return expr("EVars",[this.toArray(function(vv,p1) {
-				var name = vv.name;
 				var type = vv.type;
 				var expr2 = vv.expr;
-				var fields = [{ field : "name", expr : _gthis.toString(name,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "type", expr : _gthis.toOpt($bind(_gthis,_gthis.toCType),type,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "expr", expr : _gthis.toOpt($bind(_gthis,_gthis.toExpr),expr2,p1), quotes : haxe_macro_QuoteStatus.Unquoted}];
+				var fields = [{ field : "name", expr : _gthis.toString(vv.name,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "type", expr : _gthis.toOpt($bind(_gthis,_gthis.toCType),type,p1), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "expr", expr : _gthis.toOpt($bind(_gthis,_gthis.toExpr),expr2,p1), quotes : haxe_macro_QuoteStatus.Unquoted}];
 				return _gthis.toObj(fields,p1);
-			},vl1,p)]);
+			},_g.vars,p)]);
 		case 11:
-			var f1 = _g.f;
-			var kind = _g.kind;
-			var kind1;
-			switch(kind._hx_index) {
+			var _g22 = _g.f;
+			var _g21 = _g.kind;
+			var kind;
+			switch(_g21._hx_index) {
 			case 0:
-				kind1 = this.mkEnum("FunctionKind","FAnonymous",[],p);
+				kind = this.mkEnum("FunctionKind","FAnonymous",[],p);
 				break;
 			case 1:
-				var inlined = kind.inlined;
-				var name1 = kind.name;
-				kind1 = this.mkEnum("FunctionKind","FNamed",[this.toString(name1,p),this.toOpt($bind(this,this.toBool),inlined,p)],p);
+				kind = this.mkEnum("FunctionKind","FNamed",[this.toString(_g21.name,p),this.toOpt($bind(this,this.toBool),_g21.inlined,p)],p);
 				break;
 			case 2:
-				kind1 = this.mkEnum("FunctionKind","FArrow",[],p);
+				kind = this.mkEnum("FunctionKind","FArrow",[],p);
 				break;
 			}
-			return expr("EFunction",[kind1,this.toFun(f1,p)]);
+			return expr("EFunction",[kind,this.toFun(_g22,p)]);
 		case 12:
-			var el3 = _g.exprs;
-			return expr("EBlock",[this.toExprArray(el3,p)]);
+			return expr("EBlock",[this.toExprArray(_g.exprs,p)]);
 		case 13:
-			var e23 = _g.expr;
-			var e13 = _g.it;
-			return expr("EFor",[loop(e13),loop(e23)]);
+			return expr("EFor",[loop(_g.it),loop(_g.expr)]);
 		case 14:
-			var eelse = _g.eelse;
-			var e24 = _g.eif;
-			var e14 = _g.econd;
-			return expr("EIf",[loop(e14),loop(e24),this.toOpt($bind(this,this.toExpr),eelse,p)]);
+			return expr("EIf",[loop(_g.econd),loop(_g.eif),this.toOpt($bind(this,this.toExpr),_g.eelse,p)]);
 		case 15:
-			var normalWhile = _g.normalWhile;
-			var e25 = _g.e;
-			var e15 = _g.econd;
-			return expr("EWhile",[loop(e15),loop(e25),this.toBool(normalWhile,p)]);
+			return expr("EWhile",[loop(_g.econd),loop(_g.e),this.toBool(_g.normalWhile,p)]);
 		case 16:
-			var def = _g.edef;
-			var cases = _g.cases;
-			var e16 = _g.e;
 			var scase = function(swc,p3) {
-				var el4 = swc.values;
 				var eg = swc.guard;
-				var e7 = swc.expr;
-				var scase1 = { field : "values", expr : _gthis.toExprArray(el4,p3), quotes : haxe_macro_QuoteStatus.Unquoted};
+				var e3 = swc.expr;
+				var scase1 = { field : "values", expr : _gthis.toExprArray(swc.values,p3), quotes : haxe_macro_QuoteStatus.Unquoted};
 				var scase2 = { field : "guard", expr : _gthis.toOpt($bind(_gthis,_gthis.toExpr),eg,p3), quotes : haxe_macro_QuoteStatus.Unquoted};
-				var scase3 = _gthis.toOpt($bind(_gthis,_gthis.toExpr),e7,p3);
+				var scase3 = _gthis.toOpt($bind(_gthis,_gthis.toExpr),e3,p3);
 				return _gthis.toObj([scase1,scase2,{ field : "expr", expr : scase3, quotes : haxe_macro_QuoteStatus.Unquoted}],p3);
 			};
-			return expr("ESwitch",[loop(e16),this.toArray(scase,cases,p),this.toOpt(function(def2,p4) {
+			return expr("ESwitch",[loop(_g.e),this.toArray(scase,_g.cases,p),this.toOpt(function(def2,p4) {
 				return _gthis.toOpt(function(def3,p5) {
 					return _gthis.toExpr(def3,p5);
 				},def2,p4);
-			},def,p)]);
+			},_g.edef,p)]);
 		case 17:
-			var catches = _g.catches;
-			var e17 = _g.e;
-			var scatch = function(c2,p6) {
-				var n2 = c2.name;
-				var t1 = c2.type;
-				var e8 = c2.expr;
-				var scatch1 = { field : "name", expr : _gthis.toString(n2,p6), quotes : haxe_macro_QuoteStatus.Unquoted};
-				var scatch2 = { field : "type", expr : _gthis.toCType(t1,p6), quotes : haxe_macro_QuoteStatus.Unquoted};
-				var scatch3 = loop(e8);
+			var scatch = function(c,p6) {
+				var t = c.type;
+				var e4 = c.expr;
+				var scatch1 = { field : "name", expr : _gthis.toString(c.name,p6), quotes : haxe_macro_QuoteStatus.Unquoted};
+				var scatch2 = { field : "type", expr : _gthis.toCType(t,p6), quotes : haxe_macro_QuoteStatus.Unquoted};
+				var scatch3 = loop(e4);
 				return _gthis.toObj([scatch1,scatch2,{ field : "expr", expr : scatch3, quotes : haxe_macro_QuoteStatus.Unquoted}],p6);
 			};
-			return expr("ETry",[loop(e17),this.toArray(scatch,catches,p)]);
+			return expr("ETry",[loop(_g.e),this.toArray(scatch,_g.catches,p)]);
 		case 18:
-			var eo = _g.e;
-			return expr("EReturn",[this.toOpt($bind(this,this.toExpr),eo,p)]);
+			return expr("EReturn",[this.toOpt($bind(this,this.toExpr),_g.e,p)]);
 		case 19:
 			return expr("EBreak",[]);
 		case 20:
 			return expr("EContinue",[]);
 		case 21:
-			var e9 = _g.e;
-			return expr("EUntyped",[loop(e9)]);
+			return expr("EUntyped",[loop(_g.e)]);
 		case 22:
-			var e10 = _g.e;
-			return expr("EThrow",[loop(e10)]);
+			return expr("EThrow",[loop(_g.e)]);
 		case 23:
-			var ct = _g.t;
-			var e18 = _g.e;
-			return expr("ECast",[loop(e18),this.toOpt($bind(this,this.toCType),ct,p)]);
+			return expr("ECast",[loop(_g.e),this.toOpt($bind(this,this.toCType),_g.t,p)]);
 		case 24:
-			var dk = _g.displayKind;
-			var e19 = _g.e;
-			return expr("EDisplay",[loop(e19),this.toDisplaykind(dk,p)]);
+			return expr("EDisplay",[loop(_g.e),this.toDisplaykind(_g.displayKind,p)]);
 		case 25:
-			var t2 = _g.t;
-			return expr("EDisplayNew",[this.toTPath(t2,p)]);
+			return expr("EDisplayNew",[this.toTPath(_g.t,p)]);
 		case 26:
-			var e31 = _g.eelse;
-			var e26 = _g.eif;
-			var e110 = _g.econd;
-			return expr("ETernary",[loop(e110),loop(e26),loop(e31)]);
+			return expr("ETernary",[loop(_g.econd),loop(_g.eif),loop(_g.eelse)]);
 		case 27:
-			var ct1 = _g.t;
-			var e111 = _g.e;
-			return expr("ECheckType",[loop(e111),this.toCType(ct1,p)]);
+			return expr("ECheckType",[loop(_g.e),this.toCType(_g.t,p)]);
 		case 28:
-			var e112 = _g.e;
-			var md = _g.s;
-			switch(md.name) {
+			var _g17 = _g.e;
+			var _g16 = _g.s;
+			switch(_g16.name) {
 			case "$a":
-				var _g1 = e112.expr;
+				var _g1 = _g17.expr;
 				if(_g1._hx_index == 6) {
-					var el5 = _g1.values;
-					return expr("EArrayDecl",[this.toExprArray(el5,p)]);
+					return expr("EArrayDecl",[this.toExprArray(_g1.values,p)]);
 				} else {
-					return expr("EArrayDecl",[e112]);
+					return expr("EArrayDecl",[_g17]);
 				}
 				break;
 			case "$b":
-				return expr("EBlock",[e112]);
+				return expr("EBlock",[_g17]);
 			case "$":case "$e":
-				return e112;
+				return _g17;
 			case "$i":
-				return expr("EConst",[this.mkEnum("Constant","CIdent",[e112],e112.pos)]);
+				return expr("EConst",[this.mkEnum("Constant","CIdent",[_g17],_g17.pos)]);
 			case "$p":
 				return { expr : haxe_macro_ExprDef.ECall({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("haxe")), pos : p},"macro"), pos : p},"ExprTools"), pos : p},"toFieldExpr"), pos : p},[e]), pos : p};
 			case "$v":
 				return { expr : haxe_macro_ExprDef.ECall({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EField({ expr : haxe_macro_ExprDef.EConst(haxe_macro_Constant.CIdent("haxe")), pos : p},"macro"), pos : p},"Context"), pos : p},"makeExpr"), pos : p},[e,this.toPos(e.pos)]), pos : p};
 			case ":pos":
-				if(md.params.length == 1) {
+				if(_g16.params.length == 1) {
 					var old = this.curPos;
-					this.curPos = md.params[0];
-					var e20 = loop(e112);
+					this.curPos = _g16.params[0];
+					var e5 = loop(_g17);
 					this.curPos = old;
-					return e20;
+					return e5;
 				} else {
-					return expr("EMeta",[this.toObj([{ field : "name", expr : this.toString(md.name,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toExprArray(md.params,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "pos", expr : this.toPos(p), quotes : haxe_macro_QuoteStatus.Unquoted}],p),loop(e112)]);
+					return expr("EMeta",[this.toObj([{ field : "name", expr : this.toString(_g16.name,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toExprArray(_g16.params,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "pos", expr : this.toPos(p), quotes : haxe_macro_QuoteStatus.Unquoted}],p),loop(_g17)]);
 				}
 				break;
 			default:
-				return expr("EMeta",[this.toObj([{ field : "name", expr : this.toString(md.name,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toExprArray(md.params,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "pos", expr : this.toPos(p), quotes : haxe_macro_QuoteStatus.Unquoted}],p),loop(e112)]);
+				return expr("EMeta",[this.toObj([{ field : "name", expr : this.toString(_g16.name,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : this.toExprArray(_g16.params,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "pos", expr : this.toPos(p), quotes : haxe_macro_QuoteStatus.Unquoted}],p),loop(_g17)]);
 			}
 			break;
 		}
@@ -7313,35 +6362,27 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 		var params = [];
 		var _g = 0;
 		var _g1 = t.params;
-		while(_g < _g1.length) {
-			var tp = _g1[_g];
-			++_g;
-			params.push(this.toTParamDecl(tp,p));
-		}
+		while(_g < _g1.length) params.push(this.toTParamDecl(_g1[_g++],p));
 		var constraints = [];
 		var _g2 = 0;
 		var _g3 = t.constraints;
-		while(_g2 < _g3.length) {
-			var c = _g3[_g2];
-			++_g2;
-			constraints.push(this.toCType(c,p));
-		}
+		while(_g2 < _g3.length) constraints.push(this.toCType(_g3[_g2++],p));
 		return this.toObj([{ field : "name", expr : this.toString(t.name,p), quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "params", expr : { expr : haxe_macro_ExprDef.EArrayDecl(params), pos : p}, quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "constraints", expr : { expr : haxe_macro_ExprDef.EArrayDecl(constraints), pos : p}, quotes : haxe_macro_QuoteStatus.Unquoted}],p);
 	}
 	,toTypeDef: function(td) {
 		var p = td.pos;
 		var _g = td.decl;
 		if(_g._hx_index == 0) {
-			var d = _g.d;
+			var _g1 = _g.d;
 			var ext = null;
 			var impl = [];
 			var interf = false;
 			var isFinal = false;
-			var _g1 = 0;
-			var _g11 = d.flags;
-			while(_g1 < _g11.length) {
-				var f = _g11[_g1];
-				++_g1;
+			var _g2 = 0;
+			var _g11 = _g1.flags;
+			while(_g2 < _g11.length) {
+				var f = _g11[_g2];
+				++_g2;
 				switch(f._hx_index) {
 				case 0:
 					interf = true;
@@ -7352,33 +6393,23 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 					isFinal = true;
 					break;
 				case 4:
-					var t = f.t;
-					ext = this.toTPath(t,td.pos);
+					ext = this.toTPath(f.t,td.pos);
 					break;
 				case 5:
-					var i = f.t;
-					impl.push(this.toTPath(i,td.pos));
+					impl.push(this.toTPath(f.t,td.pos));
 					break;
 				}
 			}
 			var params = [];
-			var _g2 = 0;
-			var _g3 = d.params;
-			while(_g2 < _g3.length) {
-				var par = _g3[_g2];
-				++_g2;
-				params.push(this.toTParamDecl(par,p));
-			}
+			var _g21 = 0;
+			var _g3 = _g1.params;
+			while(_g21 < _g3.length) params.push(this.toTParamDecl(_g3[_g21++],p));
 			var isExtern = false;
 			var _g4 = 0;
-			var _g5 = d.flags;
-			while(_g4 < _g5.length) {
-				var f1 = _g5[_g4];
-				++_g4;
-				if(f1._hx_index == 1) {
-					isExtern = true;
-					break;
-				}
+			var _g5 = _g1.flags;
+			while(_g4 < _g5.length) if(_g5[_g4++]._hx_index == 1) {
+				isExtern = true;
+				break;
 			}
 			var kindParams = [];
 			if(ext == null) {
@@ -7391,15 +6422,11 @@ haxeparser__$HaxeParser_Reificator.prototype = {
 			kindParams.push(this.toBool(isFinal,p));
 			var fields = [];
 			var _g6 = 0;
-			var _g7 = d.data;
-			while(_g6 < _g7.length) {
-				var d1 = _g7[_g6];
-				++_g6;
-				fields.push(this.toCField(d1,p));
-			}
-			var tmp = { field : "name", expr : this.toString(d.name,p), quotes : haxe_macro_QuoteStatus.Unquoted};
+			var _g7 = _g1.data;
+			while(_g6 < _g7.length) fields.push(this.toCField(_g7[_g6++],p));
+			var tmp = { field : "name", expr : this.toString(_g1.name,p), quotes : haxe_macro_QuoteStatus.Unquoted};
 			var tmp1 = { field : "pos", expr : this.toPos(p), quotes : haxe_macro_QuoteStatus.Unquoted};
-			var tmp2 = { field : "meta", expr : this.toMeta(d.meta,p), quotes : haxe_macro_QuoteStatus.Unquoted};
+			var tmp2 = { field : "meta", expr : this.toMeta(_g1.meta,p), quotes : haxe_macro_QuoteStatus.Unquoted};
 			var tmp3 = { field : "isExtern", expr : this.toBool(isExtern,p), quotes : haxe_macro_QuoteStatus.Unquoted};
 			var tmp4 = this.mkEnum("TypeDefKind","TDClass",kindParams,p);
 			return this.toObj([{ field : "pack", expr : { expr : haxe_macro_ExprDef.EArrayDecl([]), pos : p}, quotes : haxe_macro_QuoteStatus.Unquoted},tmp,tmp1,tmp2,{ field : "params", expr : { expr : haxe_macro_ExprDef.EArrayDecl(params), pos : p}, quotes : haxe_macro_QuoteStatus.Unquoted},tmp3,{ field : "kind", expr : tmp4, quotes : haxe_macro_QuoteStatus.Unquoted},{ field : "fields", expr : { expr : haxe_macro_ExprDef.EArrayDecl(fields), pos : p}, quotes : haxe_macro_QuoteStatus.Unquoted}],td.pos);
@@ -7439,8 +6466,7 @@ hxparse_NoMatch.prototype = $extend(hxparse_ParserError.prototype,{
 });
 var hxparse_State = function() {
 	this.finalId = -1;
-	var this1 = new Array(256);
-	this.trans = this1;
+	this.trans = new Array(256);
 };
 hxparse_State.__name__ = true;
 var hxparse_Unexpected = function(token,pos) {
@@ -7465,6 +6491,17 @@ hxparse_UnexpectedChar.prototype = $extend(hxparse_ParserError.prototype,{
 		return "Unexpected " + this.char;
 	}
 });
+var js__$Boot_HaxeError = function(val) {
+	Error.call(this);
+	this.val = val;
+	if(Error.captureStackTrace) {
+		Error.captureStackTrace(this,js__$Boot_HaxeError);
+	}
+};
+js__$Boot_HaxeError.__name__ = true;
+js__$Boot_HaxeError.__super__ = Error;
+js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
+});
 function $getIterator(o) { if( o instanceof Array ) return HxOverrides.iter(o); else return o.iterator(); }
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
@@ -7472,10 +6509,10 @@ if( String.fromCodePoint == null ) String.fromCodePoint = function(c) { return c
 String.__name__ = true;
 Array.__name__ = true;
 var __map_reserved = {};
+js_Boot.__toStr = ({ }).toString;
 Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function() {
 	return String(this.val);
 }});
-js_Boot.__toStr = ({ }).toString;
 haxe_exercise_questions_TypeQuestion.COMPLEX_TYPE_PLACEHOLDER = haxe_macro_ComplexType.TPath({ pack : [], name : "_", params : [], sub : null});
 haxe_exercise_questions_TypeQuestion.LIST = [haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_ComplexType.TFunction([haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})],haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]})),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Int", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []}))]}))]}),haxe_macro_ComplexType.TPath({ pack : [], name : "Future", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Outcome", params : [haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "String", params : []})),haxe_macro_TypeParam.TPType(haxe_macro_ComplexType.TPath({ pack : [], name : "Error", params : []}))]}))]})];
 hxparse_LexEngine.EMPTY = [];
@@ -7938,13 +6975,10 @@ haxeparser_HaxeLexer.tok = hxparse_Lexer.buildRuleset([{ rule : "", func : funct
 }},{ rule : "\"", func : function(lexer56) {
 	haxeparser_HaxeLexer.buf = new StringBuf();
 	var pmin = new hxparse_Position(lexer56.source,lexer56.pos - lexer56.current.length,lexer56.pos);
-	var pmax;
 	try {
-		pmax = lexer56.token(haxeparser_HaxeLexer.string);
+		lexer56.token(haxeparser_HaxeLexer.string);
 	} catch( e ) {
-		var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-		if(((e1) instanceof haxe_io_Eof)) {
-			var e2 = e1;
+		if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnterminatedString,haxeparser_HaxeLexer.mkPos(pmin)));
 		} else {
 			throw e;
@@ -7956,16 +6990,13 @@ haxeparser_HaxeLexer.tok = hxparse_Lexer.buildRuleset([{ rule : "", func : funct
 }},{ rule : "'", func : function(lexer57) {
 	haxeparser_HaxeLexer.buf = new StringBuf();
 	var pmin1 = new hxparse_Position(lexer57.source,lexer57.pos - lexer57.current.length,lexer57.pos);
-	var pmax1;
 	try {
-		pmax1 = lexer57.token(haxeparser_HaxeLexer.string2);
-	} catch( e3 ) {
-		var e4 = ((e3) instanceof js__$Boot_HaxeError) ? e3.val : e3;
-		if(((e4) instanceof haxe_io_Eof)) {
-			var e5 = e4;
+		lexer57.token(haxeparser_HaxeLexer.string2);
+	} catch( e1 ) {
+		if(((((e1) instanceof js__$Boot_HaxeError) ? e1.val : e1) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnterminatedString,haxeparser_HaxeLexer.mkPos(pmin1)));
 		} else {
-			throw e3;
+			throw e1;
 		}
 	}
 	var token1 = haxeparser_HaxeLexer.mk(lexer57,haxeparser_TokenDef.Const(haxe_macro_Constant.CString(haxeparser_HaxeLexer.unescape(haxeparser_HaxeLexer.buf.b,haxeparser_HaxeLexer.mkPos(pmin1)))));
@@ -7977,13 +7008,11 @@ haxeparser_HaxeLexer.tok = hxparse_Lexer.buildRuleset([{ rule : "", func : funct
 	var info;
 	try {
 		info = lexer58.token(haxeparser_HaxeLexer.regexp);
-	} catch( e6 ) {
-		var e7 = ((e6) instanceof js__$Boot_HaxeError) ? e6.val : e6;
-		if(((e7) instanceof haxe_io_Eof)) {
-			var e8 = e7;
+	} catch( e2 ) {
+		if(((((e2) instanceof js__$Boot_HaxeError) ? e2.val : e2) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnterminatedRegExp,haxeparser_HaxeLexer.mkPos(pmin2)));
 		} else {
-			throw e6;
+			throw e2;
 		}
 	}
 	var token2 = haxeparser_HaxeLexer.mk(lexer58,haxeparser_TokenDef.Const(haxe_macro_Constant.CRegexp(haxeparser_HaxeLexer.buf.b,info.opt)));
@@ -7992,16 +7021,13 @@ haxeparser_HaxeLexer.tok = hxparse_Lexer.buildRuleset([{ rule : "", func : funct
 }},{ rule : "/\\*", func : function(lexer59) {
 	haxeparser_HaxeLexer.buf = new StringBuf();
 	var pmin3 = new hxparse_Position(lexer59.source,lexer59.pos - lexer59.current.length,lexer59.pos);
-	var pmax2;
 	try {
-		pmax2 = lexer59.token(haxeparser_HaxeLexer.comment);
-	} catch( e9 ) {
-		var e10 = ((e9) instanceof js__$Boot_HaxeError) ? e9.val : e9;
-		if(((e10) instanceof haxe_io_Eof)) {
-			var e11 = e10;
+		lexer59.token(haxeparser_HaxeLexer.comment);
+	} catch( e3 ) {
+		if(((((e3) instanceof js__$Boot_HaxeError) ? e3.val : e3) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnclosedComment,haxeparser_HaxeLexer.mkPos(pmin3)));
 		} else {
-			throw e9;
+			throw e3;
 		}
 	}
 	var token3 = haxeparser_HaxeLexer.mk(lexer59,haxeparser_TokenDef.Comment(haxeparser_HaxeLexer.buf.b));
@@ -8058,9 +7084,7 @@ haxeparser_HaxeLexer.string2 = hxparse_Lexer.buildRuleset([{ rule : "\\\\\\\\", 
 	try {
 		lexer5.token(haxeparser_HaxeLexer.codeString);
 	} catch( e ) {
-		var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-		if(((e1) instanceof haxe_io_Eof)) {
-			var e2 = e1;
+		if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnclosedCode,haxeparser_HaxeLexer.mkPos(pmin)));
 		} else {
 			throw e;
@@ -8084,9 +7108,7 @@ haxeparser_HaxeLexer.codeString = hxparse_Lexer.buildRuleset([{ rule : "{|/", fu
 	try {
 		lexer2.token(haxeparser_HaxeLexer.string);
 	} catch( e ) {
-		var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-		if(((e1) instanceof haxe_io_Eof)) {
-			var e2 = e1;
+		if(((((e) instanceof js__$Boot_HaxeError) ? e.val : e) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnterminatedString,haxeparser_HaxeLexer.mkPos(pmin)));
 		} else {
 			throw e;
@@ -8100,13 +7122,11 @@ haxeparser_HaxeLexer.codeString = hxparse_Lexer.buildRuleset([{ rule : "{|/", fu
 	var pmin1 = new hxparse_Position(lexer3.source,lexer3.pos - lexer3.current.length,lexer3.pos);
 	try {
 		lexer3.token(haxeparser_HaxeLexer.string2);
-	} catch( e3 ) {
-		var e4 = ((e3) instanceof js__$Boot_HaxeError) ? e3.val : e3;
-		if(((e4) instanceof haxe_io_Eof)) {
-			var e5 = e4;
+	} catch( e1 ) {
+		if(((((e1) instanceof js__$Boot_HaxeError) ? e1.val : e1) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnterminatedString,haxeparser_HaxeLexer.mkPos(pmin1)));
 		} else {
-			throw e3;
+			throw e1;
 		}
 	}
 	haxeparser_HaxeLexer.buf.b += String.fromCodePoint(39);
@@ -8116,13 +7136,11 @@ haxeparser_HaxeLexer.codeString = hxparse_Lexer.buildRuleset([{ rule : "{|/", fu
 	var pmin2 = new hxparse_Position(lexer4.source,lexer4.pos - lexer4.current.length,lexer4.pos);
 	try {
 		lexer4.token(haxeparser_HaxeLexer.comment);
-	} catch( e6 ) {
-		var e7 = ((e6) instanceof js__$Boot_HaxeError) ? e6.val : e6;
-		if(((e7) instanceof haxe_io_Eof)) {
-			var e8 = e7;
+	} catch( e2 ) {
+		if(((((e2) instanceof js__$Boot_HaxeError) ? e2.val : e2) instanceof haxe_io_Eof)) {
 			throw new js__$Boot_HaxeError(new haxeparser_LexerError(haxeparser_LexerErrorMsg.UnclosedComment,haxeparser_HaxeLexer.mkPos(pmin2)));
 		} else {
-			throw e6;
+			throw e2;
 		}
 	}
 	lexer4.token(haxeparser_HaxeLexer.codeString);
