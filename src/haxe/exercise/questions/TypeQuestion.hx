@@ -12,14 +12,15 @@ class TypeQuestion implements Question {
 	public static final LIST:Array<ComplexType> = [
 		macro:Outcome<String, Error>,
 		macro:String,
-		macro:String->String,
 		macro:Int,
-		macro:Int->String,
-		macro:Int->Outcome<Int, Error>,
 		macro:Future<Int>,
 		macro:Future<String>,
 		macro:Future<Future<String>>,
 		macro:Future<Outcome<String, Error>>,
+		// TODO: need a robust way to check the answer for these:
+		// macro:String->String,
+		// macro:Int->String,
+		// macro:Int->Outcome<Int, Error>,
 	];
 	
 	public final index:Int;
@@ -82,7 +83,7 @@ class TypeQuestion implements Question {
 			try {
 				switch expr.expr {
 					case EVars([{type: v}]):
-						printer.printComplexType(ANSWER) == printer.printComplexType(v);
+						printer.printComplexType(macro:Int->$ANSWER) == printer.printComplexType(v);
 					case _:
 						false;
 				}
